@@ -1,0 +1,20 @@
+{
+  "type": "mysql",
+  "host": "127.0.0.1",
+  "port": 3306,
+  "username": "joaquinvilchez",
+  "password": "12345678",
+  "database": "nuestroterreno_api_db",
+  "entities": [
+    "/Users/joaquinvilchez/Documents/Projects/mvt/nuestroterreno-api/dist/src/**/**/*entity{.ts,.js}"
+  ],
+  "autoLoadEntities": true,
+  "migrationsRun": true,
+  "migrations": [
+    "/Users/joaquinvilchez/Documents/Projects/mvt/nuestroterreno-api/dist/src/migration/**/*{.ts,.js}"
+  ],
+  "migrationsTableName": "migrations_typeorm",
+  "synchronize": false,
+  "logging": true,
+  "logger": "file"
+}
