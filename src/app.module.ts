@@ -4,6 +4,7 @@ import { AppService } from './app.service';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TYPEORM_CONFIG } from './config/constants';
+import { ParticipantModule } from './participants/participant.module';
 import databaseConfig from './config/database.config';
 import * as Joi from 'joi';
 
@@ -25,6 +26,7 @@ import * as Joi from 'joi';
           .default('development'), // Establece un valor predeterminado si NODE_ENV no está definido.
       }),
     }),
+    ParticipantModule,
   ],
   controllers: [AppController],
   providers: [AppService],

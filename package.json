@@ -25,9 +25,11 @@
     "generate:typeorm-config": "ts-node scripts/generate-typeorm-config-file.ts"
   },
   "dependencies": {
+    "@nestjs/class-validator": "^0.13.1",
     "@nestjs/common": "^10.0.0",
     "@nestjs/config": "^3.2.3",
     "@nestjs/core": "^10.0.0",
+    "@nestjs/mapped-types": "*",
     "@nestjs/platform-express": "^10.0.0",
     "@nestjs/typeorm": "^10.0.2",
     "joi": "^17.13.3",
