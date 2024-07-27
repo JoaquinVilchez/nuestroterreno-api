@@ -6,12 +6,12 @@
   "password": "12345678",
   "database": "nuestroterreno_api_db",
   "entities": [
-    "/Users/joaquinvilchez/Documents/Projects/mvt/nuestroterreno-api/dist/src/**/**/*entity{.ts,.js}"
+    "/Users/joaquinvilchez/Documents/Projects/mvt/nuestroterreno-api/dist/src/**/*.entity{.ts,.js}"
   ],
   "autoLoadEntities": true,
-  "migrationsRun": true,
+  "migrationsRun": false,
   "migrations": [
-    "/Users/joaquinvilchez/Documents/Projects/mvt/nuestroterreno-api/dist/src/migration/**/*{.ts,.js}"
+    "/Users/joaquinvilchez/Documents/Projects/mvt/nuestroterreno-api/dist/src/src/migrations/*{.ts,.js}"
   ],
   "migrationsTableName": "migrations_typeorm",
   "synchronize": false,
