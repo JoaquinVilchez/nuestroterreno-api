@@ -4,8 +4,6 @@ import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { DataSource, DataSourceOptions } from 'typeorm';
 import { join } from 'path';
 
-console.log(process.env.DATABASE_HOST);
-
 function typeormModuleOptions(): TypeOrmModuleOptions {
   return {
     type: 'mysql',
