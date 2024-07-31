@@ -2,9 +2,9 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { SERVER_PORT } from './config/constants';
+import { SERVER_PORT } from '../config/constants';
 import generateTypeOrmConfigFile from 'scripts/generate-typeorm-config-file';
-import { corsConfig } from './config/cors.config';
+import { corsConfig } from '../config/cors.config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
