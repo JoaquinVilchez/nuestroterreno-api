@@ -7,6 +7,7 @@ import databaseConfig from '../config/database.config';
 import * as Joi from 'joi';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { TYPEORM_CONFIG } from 'config/constants';
+import { LotModule } from './lots/lots.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { TYPEORM_CONFIG } from 'config/constants';
       }),
     }),
     ParticipantModule,
+    LotModule,
   ],
 
   controllers: [AppController],

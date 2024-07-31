@@ -1,3 +1,7 @@
+export type orderTypeValues = 'ASC' | 'DESC';
+
+export const orderByTypes = ['ASC', 'DESC'];
+
 export const drawTypeCatalog = {
   CPD: 'CPD',
   GENERAL: 'GENERAL',

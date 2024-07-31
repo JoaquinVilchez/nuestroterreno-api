@@ -17,7 +17,7 @@ export class ParticipantService {
     const queryBuilder =
       this.participantRepository.createQueryBuilder('participant');
     if (group) {
-      queryBuilder.where('participant.group = :group', { group });
+      queryBuilder.andWhere('lot.group = :group', { group });
     }
     if (type) {
       queryBuilder.andWhere('participant.type = :type', { type });
@@ -48,15 +48,20 @@ export class ParticipantService {
   }
 
   async editOne(id: number, dto: EditParticipantDto) {
-    const participant = await this.participantRepository.findOneBy({ id });
+    const participant = await this.participantRepository.preload({
+      id,
+      ...dto,
+    });
 
     if (!participant) throw new NotFoundException('El partcipante no existe');
 
-    const editedParticipant = Object.assign(participant, dto);
-    return await this.participantRepository.save(editedParticipant);
+    return await this.participantRepository.save(participant);
   }
 
   async deleteOne(id: number) {
+    const participant = await this.participantRepository.findOneBy({ id });
+    if (!participant) throw new NotFoundException('El participante no existe');
+
     return await this.participantRepository.delete(id);
   }
 }
