@@ -10,21 +10,20 @@ import { TYPEORM_CONFIG } from 'config/constants';
 
 @Module({
   imports: [
-    // Configuración asíncrona de TypeORM
     TypeOrmModule.forRootAsync({
-      inject: [ConfigService], // Inyecta ConfigService para acceder a la configuración
+      inject: [ConfigService],
       useFactory: (config: ConfigService) =>
-        config.get<TypeOrmModuleOptions>(TYPEORM_CONFIG), // Usa la función de fábrica para obtener la configuración de TypeORM desde ConfigService
+        config.get<TypeOrmModuleOptions>(TYPEORM_CONFIG),
     }),
     ConfigModule.forRoot({
       cache: true,
-      isGlobal: true, // Hace que la configuración esté disponible globalmente en toda la aplicación.
-      load: [databaseConfig], // Carga la configuración desde los archivos y/o funciones proporcionadas.
-      envFilePath: `.${process.env.NODE_ENV || 'development'}.env`, // Especifica la ruta del archivo de variables de entorno.
+      isGlobal: true,
+      load: [databaseConfig],
+      envFilePath: `.${process.env.NODE_ENV || 'development'}.env`,
       validationSchema: Joi.object({
         NODE_ENV: Joi.string()
-          .valid('development', 'production') // Define los valores válidos para NODE_ENV.
-          .default('development'), // Establece un valor predeterminado si NODE_ENV no está definido.
+          .valid('development', 'production')
+          .default('development'),
       }),
     }),
     ParticipantModule,

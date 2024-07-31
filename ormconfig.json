@@ -9,11 +9,10 @@
     "/Users/joaquinvilchez/Documents/Projects/mvt/nuestroterreno-api/dist/**/*.entity{.ts,.js}"
   ],
   "autoLoadEntities": true,
-  "migrationsRun": false,
   "migrations": [
     "/Users/joaquinvilchez/Documents/Projects/mvt/nuestroterreno-api/dist/src/migrations/*{.ts,.js}"
   ],
-  "migrationsTableName": "migrations_typeorm",
+  "dropSchema": false,
   "synchronize": false,
   "logging": true,
   "logger": "file"
