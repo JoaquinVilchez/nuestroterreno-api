@@ -1,8 +1,10 @@
-// import { Result } from 'src/result/entities/result.entity';
+import { Result } from 'src/results/entities/result.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
+  Index,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -12,6 +14,7 @@ export class Participant {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Index()
   @Column({ name: 'ball_number', type: 'integer', unique: true })
   ballNumber: number;
 
@@ -39,9 +42,10 @@ export class Participant {
   @UpdateDateColumn({ name: 'updated_at', type: 'timestamp', nullable: true })
   updatedAt: Date;
 
-  // @OneToOne(() => Result, (result) => result.participant, {
-  //   cascade: true,
-  //   onDelete: 'CASCADE',
-  // })
-  // result: Result;
+  @OneToOne(() => Result, (result: Result) => result.participant, {
+    cascade: true,
+    onDelete: 'CASCADE',
+    nullable: true,
+  })
+  result?: Result;
 }

@@ -1,13 +1,14 @@
-import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { ParticipantModule } from './participants/participant.module';
-import databaseConfig from '../config/database.config';
-import * as Joi from 'joi';
-import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
-import { TYPEORM_CONFIG } from 'config/constants';
 import { LotModule } from './lots/lots.module';
+import { Module } from '@nestjs/common';
+import { ParticipantModule } from './participants/participant.module';
+import { ResultModule } from './results/result.module';
+import { TYPEORM_CONFIG } from 'config/constants';
+import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
+import * as Joi from 'joi';
+import databaseConfig from '../config/database.config';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { LotModule } from './lots/lots.module';
     }),
     ParticipantModule,
     LotModule,
+    ResultModule,
   ],
 
   controllers: [AppController],

@@ -1,7 +1,9 @@
+import { Result } from 'src/results/entities/result.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -29,6 +31,10 @@ export class Lot {
   @UpdateDateColumn({ name: 'updated_at', type: 'timestamp', nullable: true })
   updatedAt: Date;
 
-  // @OneToOne(() => Result)
-  // result: Result;
+  @OneToOne(() => Result, (result: Result) => result.lot, {
+    cascade: true,
+    onDelete: 'CASCADE',
+    nullable: true,
+  })
+  result?: Result;
 }
