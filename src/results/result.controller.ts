@@ -15,20 +15,33 @@ import { ResultService } from './result.service';
 import { CreateResultDto } from './dto/create-result.dto';
 import { EditResultDto } from './dto/edit-result.dto';
 import { FilterQueryResultDto } from './dto/filter-query-result.dto';
+import { ParticipantService } from 'src/participants/participant.service';
 
 @Controller('result')
 export class ResultController {
-  constructor(private readonly resultService: ResultService) {}
+  constructor(
+    private readonly resultService: ResultService,
+    private readonly participantService: ParticipantService,
+  ) {}
 
   @Get()
   async getMany(@Query() filterQuery: FilterQueryResultDto) {
-    const { group, resultType, drawType, quantity, orderBy } = filterQuery;
+    const { group, resultType, drawType, quantity, orderBy, includes } =
+      filterQuery;
+
+    const includesArray = includes
+      ? Array.isArray(includes)
+        ? includes
+        : includes.split(',')
+      : [];
+
     return await this.resultService.getMany(
       group,
       resultType,
       drawType,
       quantity,
       orderBy,
+      includesArray || [],
     );
   }
 
@@ -51,6 +64,9 @@ export class ResultController {
         data,
       };
     } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw error; // Esto asegura que el error original sea enviado como respuesta.
+      }
       throw new BadRequestException('Error al registrar el resultado');
     }
   }
@@ -86,5 +102,11 @@ export class ResultController {
         `Hubo un error al eliminar el resultado con el id ${id}`,
       );
     }
+  }
+
+  @Get('getbyparticipant/:id')
+  async getByParticipantController(@Param('id', ParseIntPipe) id: number) {
+    const participant = await this.participantService.getOne(id);
+    await this.resultService.getByParticipant(participant);
   }
 }

@@ -65,7 +65,6 @@ export class LotService {
 
   async getOneById(id: number) {
     const lot = await this.lotRepository.findOneBy({ id });
-
     if (!lot) throw new NotFoundException('El lote no existe');
 
     return lot;

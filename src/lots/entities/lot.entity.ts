@@ -1,4 +1,4 @@
-import { Result } from 'src/results/entities/result.entity';
+import { Result } from '../../results/entities/result.entity';
 import {
   Column,
   CreateDateColumn,
@@ -32,7 +32,6 @@ export class Lot {
   updatedAt: Date;
 
   @OneToOne(() => Result, (result: Result) => result.lot, {
-    cascade: true,
     onDelete: 'CASCADE',
     nullable: true,
   })

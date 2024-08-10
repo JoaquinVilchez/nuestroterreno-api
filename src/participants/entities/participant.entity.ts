@@ -1,9 +1,8 @@
-import { Result } from 'src/results/entities/result.entity';
+import { Result } from '../..//results/entities/result.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
-  Index,
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -14,7 +13,6 @@ export class Participant {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Index()
   @Column({ name: 'ball_number', type: 'integer', unique: true })
   ballNumber: number;
 
@@ -43,7 +41,6 @@ export class Participant {
   updatedAt: Date;
 
   @OneToOne(() => Result, (result: Result) => result.participant, {
-    cascade: true,
     onDelete: 'CASCADE',
     nullable: true,
   })

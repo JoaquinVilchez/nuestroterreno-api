@@ -1,10 +1,9 @@
-import { Participant } from 'src/participants/entities/participant.entity';
-import { Lot } from 'src/lots/entities/lot.entity';
+import { Participant } from '../..//participants/entities/participant.entity';
+import { Lot } from '../../lots/entities/lot.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
-  Index,
   JoinColumn,
   OneToOne,
   PrimaryGeneratedColumn,
@@ -16,13 +15,17 @@ export class Result {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Index()
+  @Column({ name: 'order_number', type: 'integer', nullable: true })
+  orderNumber: number;
+
   @Column({ name: 'group', type: 'integer' })
   group: number;
 
-  @Index()
   @Column({ name: 'draw_type', type: 'varchar', length: 100 })
   drawType: string;
+
+  @Column({ name: 'result_type', type: 'varchar' })
+  resultType: string;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamp', nullable: true })
   createdAt: Date;
@@ -31,8 +34,7 @@ export class Result {
   updatedAt: Date;
 
   @OneToOne(() => Lot, (lot: Lot) => lot.result, {
-    cascade: true,
-    onDelete: 'CASCADE',
+    cascade: false,
     nullable: true,
   })
   @JoinColumn({ name: 'lot' })
@@ -42,8 +44,7 @@ export class Result {
     () => Participant,
     (participant: Participant) => participant.result,
     {
-      cascade: true,
-      onDelete: 'CASCADE',
+      cascade: false,
       nullable: true,
     },
   )

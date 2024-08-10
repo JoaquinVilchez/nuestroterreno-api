@@ -35,8 +35,7 @@ export class ResultService {
     drawType?: string,
     quantity?: number,
     orderBy?: orderTypeValues,
-    includeParticipants = false,
-    includeLots = false,
+    includes: string[] = [],
   ): Promise<Result[]> {
     if (group !== undefined && typeof group !== 'number') {
       throw new BadRequestException('El parámetro "group" debe ser un número');
@@ -67,12 +66,9 @@ export class ResultService {
       .createQueryBuilder('result')
       .where(conditions);
 
-    if (includeParticipants) {
-      queryBuilder.leftJoinAndSelect('result.participant', 'participants');
-    }
-    if (includeLots) {
-      queryBuilder.leftJoinAndSelect('result.lot', 'lots');
-    }
+    includes.forEach((include) => {
+      queryBuilder.leftJoinAndSelect(`result.${include}`, include);
+    });
 
     if (orderBy !== undefined) {
       queryBuilder.orderBy('result.id', orderBy);
@@ -172,10 +168,6 @@ export class ResultService {
       .andWhere('result.drawType = :drawType', { drawType })
       .getMany();
 
-    if (results.length === 0) {
-      throw new NotFoundException('No se encontraron resultados registrados');
-    }
-
     return results;
   }
 
@@ -189,12 +181,6 @@ export class ResultService {
       .leftJoinAndSelect('result.lot', 'lot')
       .where('lot.id = :lotId', { lotId: lot.id })
       .getOne();
-
-    if (!result) {
-      throw new NotFoundException(
-        `No se encontró resultado para el lote con ID ${lot.id}`,
-      );
-    }
 
     return result;
   }
@@ -212,12 +198,6 @@ export class ResultService {
       })
       .getOne();
 
-    if (!result) {
-      throw new NotFoundException(
-        `No se encontró resultado para el participante con ID ${participant.id}`,
-      );
-    }
-
     return result;
   }
 
@@ -229,6 +209,22 @@ export class ResultService {
     await this.assignOrderNumber(dto, isUpdate);
   }
 
+  /**
+   * Valida si es posible registrar un nuevo resultado basado en las reglas de negocio definidas.
+   *
+   * La función verifica cuántos ganadores ya han sido registrados para un tipo de sorteo y grupo
+   * específico. Utiliza esta información para determinar si se ha alcanzado el límite permitido
+   * de ganadores para las condiciones dadas.
+   *
+   * @param {CreateResultDto} dto - Datos de entrada para la creación o actualización de un resultado,
+   * que incluyen el grupo, tipo de resultado y tipo de sorteo.
+   * @param {boolean} isUpdate - Indica si la operación actual es una actualización de un resultado existente.
+   *
+   * @throws {BadRequestException} Si ya se ha alcanzado el número máximo permitido de ganadores para
+   * el tipo de resultado y grupo especificado y la operación no es una actualización.
+   *
+   * @returns {Promise<void>} No retorna ningún valor si la validación es exitosa; si falla, lanza una excepción.
+   */
   private async validateRegisteredWinners(
     dto: CreateResultDto,
     isUpdate: boolean,
@@ -238,6 +234,7 @@ export class ResultService {
       dto.resultType,
       dto.drawType,
     );
+
     const limitOfWinners = NumberOfDrawsCatalog[dto.drawType].find(
       (item) => item.group === dto.group,
     )[dto.resultType];
@@ -249,6 +246,21 @@ export class ResultService {
     }
   }
 
+  /**
+   * Valida la información del participante asociada con el resultado a registrar.
+   *
+   * Esta función realiza varias comprobaciones para asegurar que el participante
+   * especificado en el DTO sea válido para el grupo y tipo de sorteo indicado.
+   *
+   * @param {CreateResultDto} dto - Datos de entrada para la creación de un resultado,
+   * que incluyen el ID del participante, grupo, y tipo de sorteo.
+   *
+   * @throws {BadRequestException} Si el participante no existe, no pertenece al grupo especificado,
+   * o si el tipo de sorteo requiere un tipo específico de participante que no coincide.
+   *
+   * @returns {Promise<void>} No retorna ningún valor si la validación es exitosa;
+   * si falla, lanza una excepción indicando el error específico.
+   */
   private async validateParticipant(dto: CreateResultDto): Promise<void> {
     const participant = await this.participantService.getOne(dto.participant);
     if (!participant) {
@@ -271,6 +283,24 @@ export class ResultService {
     }
   }
 
+  /**
+   * Valida si el participante ya tiene un resultado asignado.
+   *
+   * Esta función comprueba si el participante especificado en el DTO ya ha sido
+   * registrado previamente como ganador. Si el participante ya tiene un resultado
+   * asignado y no se está realizando una actualización, lanza una excepción.
+   *
+   * @param {CreateResultDto} dto - Datos de entrada para la creación de un resultado,
+   * que incluyen el ID del participante.
+   * @param {boolean} isUpdate - Indica si la operación es una actualización. Si es true,
+   * permite que el participante mantenga su resultado anterior.
+   *
+   * @throws {BadRequestException} Si el participante ya tiene un resultado asignado y
+   * la operación no es una actualización.
+   *
+   * @returns {Promise<void>} No retorna ningún valor si la validación es exitosa;
+   * si falla, lanza una excepción indicando que el participante ya tiene un resultado.
+   */
   private async validateParticipantWinner(
     dto: CreateResultDto,
     isUpdate: boolean,
@@ -284,6 +314,25 @@ export class ResultService {
     }
   }
 
+  /**
+   * Valida la información del lote asociado con el resultado a registrar.
+   *
+   * Esta función verifica si es necesario proporcionar un lote para el tipo de resultado
+   * dado. Si el tipo de resultado es "INCUMBENT" y no se proporciona un lote,
+   * lanza una excepción. También valida que el lote no tenga ya un ganador asignado,
+   * a menos que la operación sea una actualización.
+   *
+   * @param {CreateResultDto} dto - Datos de entrada para la creación de un resultado,
+   * que incluyen el ID del lote, el grupo y el tipo de sorteo.
+   * @param {boolean} isUpdate - Indica si la operación es una actualización. Si es true,
+   * permite que el lote mantenga su resultado anterior.
+   *
+   * @throws {BadRequestException} Si no se proporciona un lote cuando es necesario,
+   * o si el lote ya tiene un ganador asignado y la operación no es una actualización.
+   *
+   * @returns {Promise<void>} No retorna ningún valor si la validación es exitosa;
+   * si falla, lanza una excepción indicando el error específico.
+   */
   private async validateLot(
     dto: CreateResultDto,
     isUpdate: boolean,
@@ -305,6 +354,23 @@ export class ResultService {
     }
   }
 
+  /**
+   * Asigna un número de orden para el resultado en función de los ganadores registrados.
+   *
+   * Esta función asigna un número de orden secuencial a los resultados de tipo "ALTERNATE" o suplentes.
+   * Si no se está realizando una actualización, la función calcula cuántos ganadores
+   * alternativos ya están registrados en el grupo y sorteo específicos, y asigna el siguiente
+   * número de orden disponible.
+   *
+   * @param {CreateResultDto} dto - Datos de entrada para la creación de un resultado,
+   * que incluyen el grupo y el tipo de sorteo.
+   * @param {boolean} isUpdate - Indica si la operación es una actualización. Si es true,
+   * no se recalcula el número de orden.
+   *
+   * @returns {Promise<void>} No retorna ningún valor si la operación es exitosa.
+   * Si se trata de un resultado de tipo "ALTERNATE" y no es una actualización,
+   * asigna el número de orden correspondiente.
+   */
   private async assignOrderNumber(
     dto: CreateResultDto,
     isUpdate: boolean,

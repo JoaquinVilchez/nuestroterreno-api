@@ -1,5 +1,5 @@
 import {
-  IsBoolean,
+  IsArray,
   IsNumber,
   IsOptional,
   IsString,
@@ -27,9 +27,8 @@ export class FilterQueryResultDto {
   @IsString()
   orderBy?: orderTypeValues;
 
-  @IsBoolean()
-  includeParticipants: boolean;
-
-  @IsBoolean()
-  includeLots: boolean;
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  includes?: string[] | string;
 }
