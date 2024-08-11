@@ -54,7 +54,6 @@ export class LotService {
         drawType: drawType,
       },
     });
-
     if (!lot)
       throw new NotFoundException(
         `No existe un lote con el id ${id}, el grupo ${group} y el tipo de sorteo ${drawType}`,

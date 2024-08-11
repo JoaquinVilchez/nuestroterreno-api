@@ -16,7 +16,7 @@ export const NumberOfDrawsCatalog = {
   CPD: [
     {
       group: 1,
-      incumbent: 2,
+      incumbent: 1,
       alternate: 6,
     },
     {

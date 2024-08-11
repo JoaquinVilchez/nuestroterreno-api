@@ -81,20 +81,6 @@ export class ResultService {
     return await queryBuilder.getMany();
   }
 
-  async getLastResult(): Promise<Result> {
-    const result = await this.resultRepository
-      .createQueryBuilder('result')
-      .leftJoinAndSelect('result.lot', 'lot')
-      .orderBy('result.id', 'DESC')
-      .getOne();
-
-    if (!result) {
-      throw new NotFoundException('No se encontró el último resultado');
-    }
-
-    return result;
-  }
-
   async getOne(id: number): Promise<Result> {
     const result = await this.resultRepository.findOne({
       where: { id },
@@ -110,15 +96,11 @@ export class ResultService {
 
   async createOne(dto: CreateResultDto) {
     const participant = await this.participantService.getOne(dto.participant);
-    if (!participant) {
-      throw new NotFoundException(
-        `Participant with ID ${dto.participant} not found`,
-      );
-    }
 
-    const lot = dto.lot ? await this.lotService.getOneById(dto.lot) : null;
-    if (dto.lot && !lot) {
-      throw new NotFoundException(`Lot with ID ${dto.lot} not found`);
+    let lot = null;
+
+    if (dto.drawType === 'incumbent') {
+      lot = dto.lot ? await this.lotService.getOneById(dto.lot) : null;
     }
 
     const result = this.resultRepository.create({
@@ -151,6 +133,52 @@ export class ResultService {
     await this.resultRepository.delete(id);
   }
 
+  /**
+   * Obtiene el último resultado registrado en la base de datos.
+   *
+   * Esta función utiliza un query builder para seleccionar el último resultado
+   * registrado en la tabla `result`, realizando un LEFT JOIN con la tabla `lot`
+   * para incluir la información del lote asociado. Los resultados se ordenan
+   * en orden descendente por el campo `id`, asegurando que se obtenga el más reciente.
+   * Si no se encuentra ningún resultado, se lanza una excepción.
+   *
+   * @throws {NotFoundException} Si no se encuentra ningún resultado registrado.
+   *
+   * @returns {Promise<Result>} Retorna el último resultado encontrado, incluyendo
+   * la información del lote asociado.
+   */
+  async getLastResult(): Promise<Result> {
+    const result = await this.resultRepository
+      .createQueryBuilder('result')
+      .leftJoinAndSelect('result.lot', 'lot')
+      .orderBy('result.id', 'DESC')
+      .getOne();
+
+    if (!result) {
+      throw new NotFoundException('No se encontró el último resultado');
+    }
+
+    return result;
+  }
+
+  /**
+   * Obtiene los resultados registrados que cumplen con los parámetros especificados.
+   *
+   * Esta función recibe como parámetros el grupo, el tipo de resultado, y el tipo
+   * de sorteo. Utiliza un query builder para buscar en la tabla `result` aquellos
+   * registros que coinciden con estos parámetros, realizando un LEFT JOIN con la
+   * tabla `participant` para incluir la información del participante asociado.
+   * Si alguno de los parámetros no es proporcionado, lanza una excepción.
+   *
+   * @param {number} group - El grupo al que pertenece el participante.
+   * @param {string} resultType - El tipo de resultado a buscar.
+   * @param {string} drawType - El tipo de sorteo a buscar.
+   *
+   * @throws {BadRequestException} Si alguno de los parámetros obligatorios no es proporcionado.
+   *
+   * @returns {Promise<Result[]>} Retorna un array de resultados que coinciden con los parámetros
+   * especificados, incluyendo la información del participante asociado.
+   */
   async getRegisteredWinners(
     group: number,
     resultType: string,
@@ -171,6 +199,19 @@ export class ResultService {
     return results;
   }
 
+  /**
+   * Obtiene un resultado específico basado en el lote proporcionado.
+   *
+   * Esta función recibe un objeto `Lot` como parámetro y utiliza un query builder
+   * para buscar en la tabla `result` el registro que está asociado con ese lote.
+   * Si el lote no es proporcionado, lanza una excepción.
+   *
+   * @param {Lot} lot - El lote por el cual se desea buscar un resultado.
+   *
+   * @throws {BadRequestException} Si el lote no es proporcionado.
+   *
+   * @returns {Promise<Result>} Retorna el resultado asociado con el lote proporcionado.
+   */
   async getByLot(lot: Lot): Promise<Result> {
     if (!lot) {
       throw new BadRequestException('El lote es obligatorio');
@@ -185,6 +226,19 @@ export class ResultService {
     return result;
   }
 
+  /**
+   * Obtiene un resultado específico basado en el participante proporcionado.
+   *
+   * Esta función recibe un objeto `Participant` como parámetro y utiliza un query builder
+   * para buscar en la tabla `result` el registro que está asociado con ese participante.
+   * Si el participante no es proporcionado, lanza una excepción.
+   *
+   * @param {Participant} participant - El participante por el cual se desea buscar un resultado.
+   *
+   * @throws {BadRequestException} Si el participante no es proporcionado.
+   *
+   * @returns {Promise<Result>} Retorna el resultado asociado con el participante proporcionado.
+   */
   async getByParticipant(participant: Participant): Promise<Result> {
     if (!participant) {
       throw new BadRequestException('El participante es obligatorio');
@@ -201,12 +255,34 @@ export class ResultService {
     return result;
   }
 
+  /**
+   * Valida los datos de un resultado antes de su registro o actualización.
+   *
+   * Esta función realiza varias validaciones sobre los datos proporcionados en el DTO
+   * de creación de resultados, como verificar si ya existen ganadores registrados para
+   * el participante, si el participante es válido, si ya es un ganador registrado, y
+   * si el lote asociado es válido. También se asigna un número de orden si es necesario.
+   *
+   * @param {CreateResultDto} dto - Datos de entrada para la creación de un resultado,
+   * que incluyen información del participante, lote, tipo de resultado, etc.
+   * @param {boolean} [isUpdate=false] - Indica si la operación es una actualización. Si es true,
+   * algunas validaciones permitirán mantener ciertos datos anteriores.
+   *
+   * @returns {Promise<void>} No retorna ningún valor si la validación es exitosa;
+   * si falla, lanza una excepción indicando el error específico.
+   */
   async validateResult(dto: CreateResultDto, isUpdate = false): Promise<void> {
     await this.validateRegisteredWinners(dto, isUpdate);
     await this.validateParticipant(dto);
     await this.validateParticipantWinner(dto, isUpdate);
-    await this.validateLot(dto, isUpdate);
-    await this.assignOrderNumber(dto, isUpdate);
+
+    if (dto.resultType === 'incumbent') {
+      await this.validateLot(dto, isUpdate);
+    }
+
+    if (dto.resultType === 'alternate') {
+      await this.assignOrderNumber(dto, isUpdate);
+    }
   }
 
   /**
@@ -306,11 +382,32 @@ export class ResultService {
     isUpdate: boolean,
   ): Promise<void> {
     const participant = await this.participantService.getOne(dto.participant);
-    const isWinner = await this.getByParticipant(participant);
-    if (isWinner && !isUpdate) {
-      throw new BadRequestException(
-        'El participante ya tiene un resultado asignado',
-      );
+
+    // Busca si el participante ya tiene algún resultado asignado
+    const existingResult = await this.getByParticipant(participant);
+
+    // Si el participante ya tiene un resultado y no se trata de una actualización
+    if (existingResult && !isUpdate) {
+      // Verifica si el participante tiene un resultado como titular en el mismo grupo
+      if (
+        existingResult.resultType === 'incumbent' &&
+        existingResult.group === dto.group
+      ) {
+        throw new BadRequestException(
+          'El participante ya tiene un resultado como titular en este grupo',
+        );
+      }
+
+      // Si el participante tiene un resultado como suplente en el mismo grupo y el nuevo registro es también como suplente
+      if (
+        existingResult.resultType === 'alternate' &&
+        dto.resultType === 'alternate' &&
+        existingResult.group === dto.group
+      ) {
+        throw new BadRequestException(
+          'El participante ya tiene un resultado como suplente en este grupo',
+        );
+      }
     }
   }
 

@@ -50,6 +50,12 @@ export class ResultController {
     try {
       return await this.resultService.getOne(id);
     } catch (error) {
+      if (
+        error instanceof BadRequestException ||
+        error instanceof NotFoundException
+      ) {
+        throw error;
+      }
       throw new NotFoundException(`Resultado con id ${id} no encontrado`);
     }
   }
@@ -64,8 +70,12 @@ export class ResultController {
         data,
       };
     } catch (error) {
-      if (error instanceof BadRequestException) {
-        throw error; // Esto asegura que el error original sea enviado como respuesta.
+      console.log(error);
+      if (
+        error instanceof BadRequestException ||
+        error instanceof NotFoundException
+      ) {
+        throw error;
       }
       throw new BadRequestException('Error al registrar el resultado');
     }
@@ -98,6 +108,12 @@ export class ResultController {
         data,
       };
     } catch (error) {
+      if (
+        error instanceof BadRequestException ||
+        error instanceof NotFoundException
+      ) {
+        throw error;
+      }
       throw new NotFoundException(
         `Hubo un error al eliminar el resultado con el id ${id}`,
       );
