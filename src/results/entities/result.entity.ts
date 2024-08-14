@@ -5,6 +5,7 @@ import {
   CreateDateColumn,
   Entity,
   JoinColumn,
+  ManyToOne,
   OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
@@ -40,14 +41,14 @@ export class Result {
   @JoinColumn({ name: 'lot' })
   lot?: Lot;
 
-  @OneToOne(
+  @ManyToOne(
     () => Participant,
-    (participant: Participant) => participant.result,
+    (participant: Participant) => participant.results,
     {
       cascade: false,
-      nullable: true,
+      nullable: false,
     },
   )
   @JoinColumn({ name: 'participant' })
-  participant?: Participant;
+  participant: Participant;
 }

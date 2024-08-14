@@ -58,9 +58,9 @@ export class ResultService {
     }
 
     const conditions: any = {};
-    if (group !== undefined) conditions['result.group'] = group;
-    if (resultType !== undefined) conditions['result.result_type'] = resultType;
-    if (drawType !== undefined) conditions['result.draw_type'] = drawType;
+    if (group !== undefined) conditions['group'] = group;
+    if (resultType !== undefined) conditions['resultType'] = resultType;
+    if (drawType !== undefined) conditions['drawType'] = drawType;
 
     const queryBuilder = this.resultRepository
       .createQueryBuilder('result')
@@ -98,8 +98,7 @@ export class ResultService {
     const participant = await this.participantService.getOne(dto.participant);
 
     let lot = null;
-
-    if (dto.drawType === 'incumbent') {
+    if (dto.resultType === 'incumbent') {
       lot = dto.lot ? await this.lotService.getOneById(dto.lot) : null;
     }
 

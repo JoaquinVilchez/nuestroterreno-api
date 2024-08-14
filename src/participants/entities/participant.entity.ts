@@ -3,7 +3,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  OneToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -40,9 +40,8 @@ export class Participant {
   @UpdateDateColumn({ name: 'updated_at', type: 'timestamp', nullable: true })
   updatedAt: Date;
 
-  @OneToOne(() => Result, (result: Result) => result.participant, {
+  @OneToMany(() => Result, (result: Result) => result.participant, {
     onDelete: 'CASCADE',
-    nullable: true,
   })
-  result?: Result;
+  results: Result[];
 }
