@@ -5,6 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import { SERVER_PORT } from '../config/constants';
 import generateTypeOrmConfigFile from 'scripts/generate-typeorm-config-file';
 import { corsConfig } from '../config/cors.config';
+import { setupSwagger } from 'config/swagger.config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -15,6 +16,8 @@ async function bootstrap() {
   generateTypeOrmConfigFile(config);
 
   app.enableCors(corsConfig(config));
+  setupSwagger(app);
+
   await app.listen(port);
   logger.log(`Server is runnign at ${await app.getUrl()}`);
 }

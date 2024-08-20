@@ -16,6 +16,14 @@ import { CreateResultDto } from './dto/create-result.dto';
 import { EditResultDto } from './dto/edit-result.dto';
 import { FilterQueryResultDto } from './dto/filter-query-result.dto';
 import { ParticipantService } from 'src/participants/participant.service';
+import {
+  ApiBody,
+  ApiOperation,
+  ApiParam,
+  ApiQuery,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 
 @Controller('result')
 export class ResultController {
@@ -24,6 +32,13 @@ export class ResultController {
     private readonly participantService: ParticipantService,
   ) {}
 
+  @ApiTags('Results')
+  @ApiOperation({ summary: 'Obtener múltiples resultados' })
+  @ApiQuery({ type: FilterQueryResultDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Resultados obtenidos exitosamente.',
+  })
   @Get()
   async getMany(@Query() filterQuery: FilterQueryResultDto) {
     const { group, resultType, drawType, quantity, orderBy, includes } =
@@ -45,6 +60,11 @@ export class ResultController {
     );
   }
 
+  @ApiTags('Results')
+  @ApiOperation({ summary: 'Obtener un resultado por ID' })
+  @ApiParam({ name: 'id', type: Number, description: 'ID del resultado' })
+  @ApiResponse({ status: 200, description: 'Resultado encontrado.' })
+  @ApiResponse({ status: 404, description: 'Resultado no encontrado.' })
   @Get(':id')
   async getOne(@Param('id', ParseIntPipe) id: number) {
     try {
@@ -60,6 +80,17 @@ export class ResultController {
     }
   }
 
+  @ApiTags('Results')
+  @ApiOperation({ summary: 'Registrar un nuevo resultado' })
+  @ApiBody({
+    type: CreateResultDto,
+    description: 'Datos para crear un nuevo resultado',
+  })
+  @ApiResponse({ status: 201, description: 'Resultado registrado con éxito.' })
+  @ApiResponse({
+    status: 400,
+    description: 'Datos inválidos o error en el proceso.',
+  })
   @Post()
   async createOne(@Body() dto: CreateResultDto) {
     try {
@@ -80,6 +111,22 @@ export class ResultController {
     }
   }
 
+  @ApiTags('Results')
+  @ApiOperation({ summary: 'Editar un resultado' })
+  @ApiParam({
+    name: 'id',
+    type: Number,
+    description: 'ID del resultado a editar',
+  })
+  @ApiBody({
+    type: EditResultDto,
+    description: 'Datos para editar un resultado',
+  })
+  @ApiResponse({ status: 200, description: 'Resultado editado con éxito.' })
+  @ApiResponse({
+    status: 404,
+    description: 'Resultado no encontrado o error al editar.',
+  })
   @Put(':id')
   async editOne(
     @Param('id', ParseIntPipe) id: number,
@@ -98,6 +145,18 @@ export class ResultController {
     }
   }
 
+  @ApiTags('Results')
+  @ApiOperation({ summary: 'Eliminar un resultado' })
+  @ApiParam({
+    name: 'id',
+    type: Number,
+    description: 'ID del resultado a eliminar',
+  })
+  @ApiResponse({ status: 200, description: 'Resultado eliminado con éxito.' })
+  @ApiResponse({
+    status: 404,
+    description: 'Resultado no encontrado o error al eliminar.',
+  })
   @Delete(':id')
   async deleteOne(@Param('id', ParseIntPipe) id: number) {
     try {
@@ -119,7 +178,18 @@ export class ResultController {
     }
   }
 
-  @Get('getbyparticipant/:id')
+  @ApiTags('Results')
+  @ApiOperation({ summary: 'Obtener resultados por ID de participante' })
+  @ApiParam({ name: 'id', type: Number, description: 'ID del participante' })
+  @ApiResponse({
+    status: 200,
+    description: 'Resultados del participante obtenidos exitosamente.',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Participante no encontrado o sin resultados.',
+  })
+  @Get('participant/:id')
   async getByParticipantController(@Param('id', ParseIntPipe) id: number) {
     const participant = await this.participantService.getOne(id);
     await this.resultService.getByParticipant(participant);
