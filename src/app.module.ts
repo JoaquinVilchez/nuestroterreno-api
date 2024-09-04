@@ -24,6 +24,12 @@ import databaseConfig from '../config/database.config';
         NODE_ENV: Joi.string()
           .valid('development', 'production')
           .default('development'),
+        CORS_ORIGIN: Joi.string().uri().required(),
+        CORS_METHODS: Joi.string().required(),
+        CORS_ALLOWED_HEADERS: Joi.string().required(),
+        CORS_CREDENTIALS: Joi.boolean().required(),
+        CORS_PREFLIGHT_CONTINUE: Joi.boolean().required(),
+        CORS_OPTIONS_SUCCESS_STATUS: Joi.number().required(),
       }),
     }),
     ParticipantModule,
