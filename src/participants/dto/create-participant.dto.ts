@@ -25,7 +25,7 @@ export class CreateParticipantDto {
   firstName: string;
 
   @ApiProperty({
-    description: 'Apellido paterno',
+    description: 'Apellido',
     example: 'Pérez',
     maxLength: 50,
   })
@@ -33,16 +33,6 @@ export class CreateParticipantDto {
   @MinLength(2)
   @MaxLength(50)
   lastName: string;
-
-  @ApiProperty({
-    description: 'Apellido materno',
-    example: 'González',
-    maxLength: 50,
-  })
-  @IsString()
-  @MinLength(2)
-  @MaxLength(50)
-  secondaryLastName: string;
 
   @ApiProperty({
     description: 'DNI del participante',

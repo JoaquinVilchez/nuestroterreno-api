@@ -22,9 +22,6 @@ export class Participant {
   @Column({ name: 'last_name', type: 'varchar', length: 50 })
   lastName: string;
 
-  @Column({ name: 'secondary_last_name', type: 'varchar', length: 50 })
-  secondaryLastName: string;
-
   @Column({ name: 'dni', type: 'varchar', length: 8, unique: true })
   dni: string;
 
