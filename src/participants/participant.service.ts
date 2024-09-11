@@ -13,14 +13,15 @@ export class ParticipantService {
     private readonly participantRepository: Repository<Participant>,
   ) {}
 
-  async getMany(group?: number, type?: string): Promise<Participant[]> {
+  async getMany(group?: number, drawType?: string): Promise<Participant[]> {
+    console.log(group, drawType);
     const queryBuilder =
       this.participantRepository.createQueryBuilder('participant');
     if (group) {
       queryBuilder.andWhere('lot.group = :group', { group });
     }
-    if (type) {
-      queryBuilder.andWhere('participant.type = :type', { type });
+    if (drawType) {
+      queryBuilder.andWhere('participant.drawType = :drawType', { drawType });
     }
     return await queryBuilder.getMany();
   }
@@ -33,11 +34,11 @@ export class ParticipantService {
     return participant;
   }
 
-  async getByGroup(group: number, type: DrawType) {
+  async getByGroup(group: number, drawType: DrawType) {
     return await this.participantRepository.find({
       where: {
         group,
-        type,
+        drawType,
       },
     });
   }

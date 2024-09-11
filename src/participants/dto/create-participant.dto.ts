@@ -57,5 +57,5 @@ export class CreateParticipantDto {
   @IsEnum(DrawType, {
     message: `Opción inválida. Las opciones correctas son ${EnumToString(DrawType)}`,
   })
-  type: string;
+  drawType: string;
 }

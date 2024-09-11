@@ -28,8 +28,8 @@ export class Participant {
   @Column({ name: 'group', type: 'integer' })
   group: number;
 
-  @Column({ name: 'type', type: 'varchar' })
-  type: string;
+  @Column({ name: 'draw_type', type: 'varchar' })
+  drawType: string;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamp', nullable: true })
   createdAt: Date;

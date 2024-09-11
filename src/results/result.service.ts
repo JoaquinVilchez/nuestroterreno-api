@@ -350,7 +350,7 @@ export class ResultService {
 
     if (
       dto.drawType === drawTypeCatalog.CPD &&
-      dto.drawType !== participant.type
+      dto.drawType !== participant.drawType
     ) {
       throw new BadRequestException(
         `El participante debe ser del tipo ${dto.drawType}`,
