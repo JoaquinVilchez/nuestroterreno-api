@@ -1,4 +1,4 @@
 export enum DrawType {
-  CPD = 'CPD',
-  GENERAL = 'GENERAL',
+  CPD = 'cpd',
+  GENERAL = 'general',
 }

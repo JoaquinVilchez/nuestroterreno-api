@@ -29,7 +29,7 @@ export class LotService {
       queryBuilder.andWhere('lot.group = :group', { group });
     }
     if (drawType) {
-      queryBuilder.andWhere('lot.draw_type = :drawType', { drawType });
+      queryBuilder.andWhere('lot.drawType = :drawType', { drawType });
     }
     if (quantity) {
       queryBuilder.take(quantity);
@@ -42,6 +42,12 @@ export class LotService {
       }
       queryBuilder.orderBy('lot.id', orderBy);
     }
+
+    // LEFT JOIN con la tabla Result para verificar si el lote está asignado
+    queryBuilder.leftJoin('lot.result', 'result');
+
+    // Filtrar solo los lotes que no tienen un resultado asignado (result.id IS NULL)
+    queryBuilder.andWhere('result.id IS NULL');
 
     return await queryBuilder.getMany();
   }

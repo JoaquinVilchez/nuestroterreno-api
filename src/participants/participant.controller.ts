@@ -35,8 +35,8 @@ export class ParticipantController {
   })
   @Get()
   async getMany(@Query() filterQuery) {
-    const { group, drawType } = filterQuery;
-    return await this.participantService.getMany(group, drawType);
+    const { group, drawType, forSelect } = filterQuery;
+    return await this.participantService.getMany(group, drawType, forSelect);
   }
 
   @ApiTags('Participants')

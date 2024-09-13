@@ -278,7 +278,6 @@ export class ResultService {
     if (dto.resultType === 'incumbent') {
       await this.validateLot(dto, isUpdate);
     }
-
     if (dto.resultType === 'alternate') {
       await this.assignOrderNumber(dto, isUpdate);
     }

@@ -3,8 +3,8 @@ export type orderTypeValues = 'ASC' | 'DESC';
 export const orderByTypes = ['ASC', 'DESC'];
 
 export const drawTypeCatalog = {
-  CPD: 'CPD',
-  GENERAL: 'GENERAL',
+  CPD: 'cpd',
+  GENERAL: 'general',
 };
 
 export const resultTypeCatalog = {
@@ -13,7 +13,7 @@ export const resultTypeCatalog = {
 };
 
 export const NumberOfDrawsCatalog = {
-  CPD: [
+  cpd: [
     {
       group: 1,
       incumbent: 1,
@@ -35,7 +35,7 @@ export const NumberOfDrawsCatalog = {
       alternate: 3,
     },
   ],
-  GENERAL: [
+  general: [
     {
       group: 1,
       incumbent: 43,
