@@ -10,6 +10,7 @@ import {
 import { Server, Socket } from 'socket.io';
 import { ResultService } from './result.service';
 import { ClientToServerEvents, ServerToClientEvents } from './event.interfaces';
+import { LotService } from 'src/lots/lots.service';
 
 @WebSocketGateway({
   cors: {
@@ -19,7 +20,10 @@ import { ClientToServerEvents, ServerToClientEvents } from './event.interfaces';
   },
 })
 export class ResultGateway {
-  constructor(private readonly resultsService: ResultService) {}
+  constructor(
+    private readonly resultsService: ResultService,
+    private readonly lotService: LotService,
+  ) {}
 
   @WebSocketServer()
   server: Server<ClientToServerEvents, ServerToClientEvents>;
@@ -60,5 +64,20 @@ export class ResultGateway {
       console.error('Error al obtener los resultados:', error);
       // Opcional: Emitir un evento de error
     }
+  }
+
+  // Manejar la solicitud de últimos resultados
+  @SubscribeMessage('requestNextLot')
+  async handleNextLot() {
+    console.log(`Recibido 'requestNextLot'`);
+    const lot = await this.lotService.getOneById(4);
+    this.server.to('mainData').emit('nextLot', lot);
+  }
+
+  // Manejar la solicitud de últimos resultados
+  @SubscribeMessage('requestDefaultPage')
+  async handleDefaultPage() {
+    console.log(`Recibido 'requestDefaultPage'`);
+    this.server.to('mainData').emit('defaultPage');
   }
 }
