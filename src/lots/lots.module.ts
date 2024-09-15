@@ -8,5 +8,6 @@ import { LotController } from './lots.controller';
   imports: [TypeOrmModule.forFeature([Lot])],
   controllers: [LotController],
   providers: [LotService],
+  exports: [LotService],
 })
 export class LotModule {}

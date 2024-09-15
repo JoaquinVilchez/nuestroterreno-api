@@ -7,6 +7,7 @@ import { TYPEORM_CONFIG } from 'config/constants';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import * as Joi from 'joi';
 import databaseConfig from '../config/database.config';
+import { AppGateway } from './app.gateway';
 
 @Module({
   imports: [
@@ -38,6 +39,6 @@ import databaseConfig from '../config/database.config';
   ],
 
   controllers: [],
-  providers: [],
+  providers: [AppGateway],
 })
 export class AppModule {}

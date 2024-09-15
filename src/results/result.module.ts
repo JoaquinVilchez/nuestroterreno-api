@@ -3,14 +3,13 @@ import { ResultService } from './result.service';
 import { ResultController } from './result.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Result } from './entities/result.entity';
-import { Participant } from 'src/participants/entities/participant.entity';
-import { LotService } from 'src/lots/lots.service';
-import { ParticipantService } from 'src/participants/participant.service';
-import { Lot } from 'src/lots/entities/lot.entity';
+import { ResultGateway } from './result.gateway';
+import { ParticipantModule } from 'src/participants/participant.module';
+import { LotModule } from 'src/lots/lots.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Result, Participant, Lot])],
+  imports: [TypeOrmModule.forFeature([Result]), ParticipantModule, LotModule],
   controllers: [ResultController],
-  providers: [ResultService, ParticipantService, LotService],
+  providers: [ResultService, ResultGateway],
 })
 export class ResultModule {}
