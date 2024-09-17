@@ -1,5 +1,3 @@
-// src/results/interfaces/events.interface.ts
-
 import { Lot } from 'src/lots/entities/lot.entity';
 import { Result } from './entities/result.entity';
 
