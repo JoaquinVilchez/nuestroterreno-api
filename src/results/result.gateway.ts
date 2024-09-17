@@ -38,46 +38,63 @@ export class ResultGateway {
     console.log(`Cliente ${client.id} se unió a la sala ${room}`);
   }
 
-  // Manejar la solicitud de últimos resultados
-  @SubscribeMessage('requestLastResults')
-  async handleRequestLastResults(@MessageBody() quantity: number) {
-    console.log(`Recibido 'requestLastResults' con cantidad: ${quantity}`);
+  @SubscribeMessage('mainScreenAction')
+  async handleMainScreenAction(@MessageBody() action: string) {
+    console.log(`Recibido 'mainScreenAction' con acción: ${action}`);
+    await this.handleAction(action, 'mainScreen');
+  }
 
-    if (typeof quantity !== 'number' || quantity <= 0) {
-      console.error('Cantidad inválida solicitada:', quantity);
-      // Opcional: Emitir un evento de error
-      return;
+  @SubscribeMessage('prompterAction')
+  async handlePrompterAction(@MessageBody() action: string) {
+    console.log(`Recibido 'prompterAction' con acción: ${action}`);
+    await this.handleAction(action, 'prompter');
+  }
+
+  @SubscribeMessage('broadcastAction')
+  async handleBroadcastAction(@MessageBody() action: string) {
+    console.log(`Recibido 'broadcastAction' con acción: ${action}`);
+    await this.handleAction(action, 'broadcast');
+  }
+
+  private async handleAction(action: string, room: string) {
+    switch (action) {
+      case 'lastResults':
+        await this.sendLastResults(room);
+        break;
+      case 'nextLot':
+        await this.sendNextLot(room);
+        break;
+      case 'defaultPage':
+        this.server.to(room).emit('defaultPage');
+        break;
+      default:
+        console.error(`Acción desconocida: ${action}`);
     }
+  }
 
+  // Métodos separados para enviar datos a salas específicas
+  private async sendLastResults(room: string) {
     try {
       const results = await this.resultsService.getMany(
         undefined,
         undefined,
         undefined,
-        quantity,
+        5,
         'DESC',
         [],
       );
-      console.log('Enviando resultados a la sala mainData');
-      this.server.to('mainData').emit('lastResults', results);
+      this.server.to(room).emit('lastResults', results);
     } catch (error) {
-      console.error('Error al obtener los resultados:', error);
-      // Opcional: Emitir un evento de error
+      console.error('Error al enviar últimos resultados:', error);
     }
   }
 
-  // Manejar la solicitud de últimos resultados
-  @SubscribeMessage('requestNextLot')
-  async handleNextLot() {
-    console.log(`Recibido 'requestNextLot'`);
-    const lot = await this.lotService.getOneById(4);
-    this.server.to('mainData').emit('nextLot', lot);
-  }
-
-  // Manejar la solicitud de últimos resultados
-  @SubscribeMessage('requestDefaultPage')
-  async handleDefaultPage() {
-    console.log(`Recibido 'requestDefaultPage'`);
-    this.server.to('mainData').emit('defaultPage');
+  private async sendNextLot(room: string) {
+    try {
+      const lot = await this.lotService.getOneById(4); // CAMBIAR
+      this.server.to(room).emit('nextLot', lot);
+    } catch (error) {
+      console.error('Error al enviar el próximo lote:', error);
+    }
   }
 }
