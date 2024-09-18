@@ -8,6 +8,8 @@ import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import * as Joi from 'joi';
 import databaseConfig from '../config/database.config';
 import { AppGateway } from './app.gateway';
+import { UserModule } from './user/user.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -36,6 +38,8 @@ import { AppGateway } from './app.gateway';
     ParticipantModule,
     LotModule,
     ResultModule,
+    UserModule,
+    AuthModule,
   ],
 
   controllers: [],

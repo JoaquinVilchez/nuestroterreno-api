@@ -1,6 +1,6 @@
-import { NestFactory } from '@nestjs/core';
+import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { Logger } from '@nestjs/common';
+import { ClassSerializerInterceptor, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { SERVER_PORT } from '../config/constants';
 import generateTypeOrmConfigFile from 'scripts/generate-typeorm-config-file';
@@ -12,6 +12,10 @@ async function bootstrap() {
   const logger = new Logger('Bootstrap');
   const config = app.get(ConfigService);
   const port = parseInt(config.get<string>(SERVER_PORT), 10) || 3000;
+
+  const reflector = app.get(Reflector);
+
+  app.useGlobalInterceptors(new ClassSerializerInterceptor(reflector));
 
   generateTypeOrmConfigFile(config);
 
