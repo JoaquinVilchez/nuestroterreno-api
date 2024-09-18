@@ -1,12 +1,19 @@
-import { IsEmail, IsNotEmpty, IsString } from '@nestjs/class-validator';
-import { AuthBody } from '../interfaces/auth.interface';
+// src/auth/dto/login.dto.ts
 
-export class AuthDto implements AuthBody {
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsString,
+  MinLength,
+} from '@nestjs/class-validator';
+
+export class LoginDto {
   @IsNotEmpty()
   @IsEmail()
   email: string;
 
   @IsNotEmpty()
   @IsString()
+  @MinLength(6)
   password: string;
 }

@@ -5,4 +5,4 @@ export const SERVER_PORT = 'SERVER_PORT';
 
 export const NUMBER_OF_GROUPS = NumberOfDrawsCatalog.cpd.length;
 
-export const PUBLIC_KEY = 'public';
+export const IS_PUBLIC_KEY = 'isPublic';

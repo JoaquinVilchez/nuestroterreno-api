@@ -24,6 +24,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { Public } from 'src/common/decorators/public.decorator';
 
 @Controller('result')
 export class ResultController {
@@ -39,6 +40,7 @@ export class ResultController {
     status: 200,
     description: 'Resultados obtenidos exitosamente.',
   })
+  @Public()
   @Get()
   async getMany(@Query() filterQuery: FilterQueryResultDto) {
     const { group, resultType, drawType, quantity, orderBy, includes } =

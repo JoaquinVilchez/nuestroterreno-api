@@ -1,11 +1,12 @@
 import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ClassSerializerInterceptor, Logger } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { SERVER_PORT } from '../config/constants';
 import generateTypeOrmConfigFile from 'scripts/generate-typeorm-config-file';
 import { corsConfig } from '../config/cors.config';
 import { setupSwagger } from 'config/swagger.config';
+import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -15,7 +16,7 @@ async function bootstrap() {
 
   const reflector = app.get(Reflector);
 
-  app.useGlobalInterceptors(new ClassSerializerInterceptor(reflector));
+  app.useGlobalGuards(new JwtAuthGuard(reflector));
 
   generateTypeOrmConfigFile(config);
 

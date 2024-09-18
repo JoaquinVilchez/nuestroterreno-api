@@ -7,18 +7,15 @@ import {
   ParseIntPipe,
   Post,
   Put,
-  UseGuards,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { User } from './entities/user.entity';
 import { EditUserDto } from './dto/edit-user.dto';
-import { AuthGuard } from 'src/auth/guards/auth.guard';
 
 @ApiTags('Users')
 @Controller('user')
-@UseGuards(AuthGuard)
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
