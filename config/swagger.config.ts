@@ -8,6 +8,10 @@ export function setupSwagger(app: INestApplication): void {
       'Documentación de la API para el sistema de sorteo de lotes "Nuestro Terreno" de la Municipalidad de Venado Tuerto',
     )
     .setVersion('1.0')
+    .addBearerAuth(
+      { type: 'http', scheme: 'bearer', bearerFormat: 'JWT' },
+      'access-token', // Este es el nombre del esquema de seguridad
+    )
     .build();
 
   const document = SwaggerModule.createDocument(app, options);
