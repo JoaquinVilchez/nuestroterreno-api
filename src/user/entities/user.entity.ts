@@ -48,3 +48,8 @@ export class User {
     }
   }
 }
+
+export type SafeUser = Omit<
+  User,
+  'password' | 'hashPassword' | 'createdAt' | 'updatedAt'
+>;

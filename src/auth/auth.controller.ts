@@ -1,14 +1,6 @@
 // src/auth/auth.controller.ts
-import {
-  Body,
-  Controller,
-  Post,
-  UseGuards,
-  Request,
-  Get,
-} from '@nestjs/common';
+import { Controller, Post, UseGuards, Request, Get } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { LoginDto } from './dto/auth.dto';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { Public } from 'src/common/decorators/public.decorator';
@@ -20,9 +12,9 @@ export class AuthController {
   @Public()
   @UseGuards(LocalAuthGuard) // Utiliza el guard para la autenticación local
   @Post('login')
-  async login(@Body() loginDto: LoginDto) {
+  async login(@Request() req) {
     // Usando Body para recibir solo los datos necesarios
-    return this.authService.login(loginDto);
+    return this.authService.login(req.user);
   }
 
   @UseGuards(JwtAuthGuard) // Guard para verificar el token JWT
