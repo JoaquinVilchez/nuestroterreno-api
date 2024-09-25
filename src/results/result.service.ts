@@ -1,5 +1,7 @@
 import {
   BadRequestException,
+  forwardRef,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -20,6 +22,7 @@ import { Participant } from 'src/participants/entities/participant.entity';
 import { ParticipantService } from 'src/participants/participant.service';
 import { LotService } from 'src/lots/lots.service';
 import { scheduledDraw } from 'helpers/catalogs';
+import { ResultGateway } from './result.gateway';
 
 @Injectable()
 export class ResultService {
@@ -28,6 +31,8 @@ export class ResultService {
     private readonly resultRepository: Repository<Result>,
     private readonly participantService: ParticipantService,
     private readonly lotService: LotService,
+    @Inject(forwardRef(() => ResultGateway))
+    private readonly resultGateway: ResultGateway, // Usa forwardRef para resolver la dependencia circular
   ) {}
 
   async getMany(
@@ -109,7 +114,20 @@ export class ResultService {
       lot,
     });
 
-    return await this.resultRepository.save(result);
+    try {
+      const savedResult = await this.resultRepository.save(result);
+      if (savedResult) {
+        // Llama al método público del gateway para emitir el evento 'nextDraw'
+        this.resultGateway.emitWinnerInfo('prompter', result);
+        setTimeout(() => {
+          this.resultGateway.emitFullInfo('prompter');
+        }, 10000);
+      }
+      return savedResult;
+    } catch (error) {
+      console.error('Error al registrar el resultado:', error);
+      throw error;
+    }
   }
 
   async editOne(id: number, dto: EditResultDto): Promise<Result> {
@@ -130,7 +148,16 @@ export class ResultService {
       throw new NotFoundException(`El resultado con ID ${id} no existe`);
     }
 
-    await this.resultRepository.delete(id);
+    try {
+      const savedResult = await this.resultRepository.delete(id);
+      if (savedResult) {
+        // Llama al método público del gateway para emitir el evento 'nextDraw'
+        this.resultGateway.emitFullInfo('prompter');
+      }
+    } catch (error) {
+      console.error('Error al registrar el resultado:', error);
+      throw error;
+    }
   }
 
   /**
@@ -499,12 +526,12 @@ export class ResultService {
       for (const draw of scheduledDraw[group]) {
         const isCurrentDraw = totalResults < draw.quantity;
 
-        if (draw.category === 'incumbent') {
+        if (draw.resultType === 'incumbent') {
           incumbentCount += draw.quantity;
         }
 
         if (isCurrentDraw) {
-          if (draw.category === 'incumbent') {
+          if (draw.resultType === 'incumbent') {
             const lot = await this.lotService.getOneById(
               incumbentCount - (draw.quantity - (totalResults + 1)),
             );

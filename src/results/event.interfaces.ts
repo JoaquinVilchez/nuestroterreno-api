@@ -1,9 +1,10 @@
-import { Lot } from 'src/lots/entities/lot.entity';
 import { Result } from './entities/result.entity';
 
 export interface ServerToClientEvents {
   lastResults: (results: Result[]) => void; // Envía resultados de las consultas a las pantallas
-  nextLot: (lot: Lot) => void; // Envía el siguiente lote a las pantallas
+  nextDraw: (result) => void;
+  fullInfo: (response) => void;
+  winnerInfo: (response) => void;
   defaultPage: () => void; // Muestra una página predeterminada (por ejemplo, logo)
 }
 

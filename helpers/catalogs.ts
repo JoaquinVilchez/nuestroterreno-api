@@ -60,13 +60,13 @@ export function generateScheduledDraw() {
         scheduledDraw[groupKey] = [];
       }
       scheduledDraw[groupKey].push({
-        type: drawType.toUpperCase(),
-        category: 'incumbent',
+        drawType: drawType.toUpperCase(),
+        resultType: 'incumbent',
         quantity: draw.incumbent,
       });
       scheduledDraw[groupKey].push({
-        type: drawType.toUpperCase(),
-        category: 'alternate',
+        drawType: drawType.toUpperCase(),
+        resultType: 'alternate',
         quantity: draw.alternate,
       });
     });

@@ -8,7 +8,8 @@ import {
 import { Server, Socket } from 'socket.io';
 import { ResultService } from './result.service';
 import { ClientToServerEvents, ServerToClientEvents } from './event.interfaces';
-import { LotService } from 'src/lots/lots.service';
+import { forwardRef, Inject } from '@nestjs/common';
+import { Result } from './entities/result.entity';
 
 @WebSocketGateway({
   cors: {
@@ -19,8 +20,8 @@ import { LotService } from 'src/lots/lots.service';
 })
 export class ResultGateway {
   constructor(
+    @Inject(forwardRef(() => ResultService)) // Usa forwardRef aquí también si es necesario
     private readonly resultsService: ResultService,
-    private readonly lotService: LotService,
   ) {}
 
   @WebSocketServer()
@@ -54,16 +55,31 @@ export class ResultGateway {
     await this.handleAction(action, 'broadcast');
   }
 
+  // Nueva función pública que puede ser llamada desde ResultService
+  public emitFullInfo(room: string) {
+    this.sendFullInfo(room); // Llama a la función privada
+  }
+
+  public emitWinnerInfo(room: string, result: Result) {
+    this.sendWinnerInfo(room, result); // Llama a la función privada
+  }
+
   private async handleAction(action: string, room: string) {
     switch (action) {
       case 'lastResults':
         await this.sendLastResults(room);
         break;
-      case 'nextLot':
-        await this.sendNextLot(room);
+      case 'nextDraw':
+        await this.sendNextDraw(room);
         break;
       case 'defaultPage':
         this.server.to(room).emit('defaultPage');
+        break;
+      case 'fullInfo':
+        await this.sendFullInfo(room);
+        break;
+      case 'winnerInfo':
+        await this.sendWinnerInfo(room);
         break;
       default:
         console.error(`Acción desconocida: ${action}`);
@@ -87,10 +103,39 @@ export class ResultGateway {
     }
   }
 
-  private async sendNextLot(room: string) {
+  private async sendNextDraw(room: string) {
     try {
-      const lot = await this.lotService.getOneById(4); // CAMBIAR
-      this.server.to(room).emit('nextLot', lot);
+      const nextDraw = await this.resultsService.getNextDraw();
+      this.server.to(room).emit('nextDraw', nextDraw);
+    } catch (error) {
+      console.error('Error al enviar el próximo lote:', error);
+    }
+  }
+
+  private async sendFullInfo(room: string) {
+    try {
+      const nextDraw = await this.resultsService.getNextDraw();
+      const lastResults = await this.resultsService.getMany(
+        undefined,
+        undefined,
+        undefined,
+        5,
+        'DESC',
+        ['participant', 'lot'],
+      );
+      const response = {
+        nextDraw,
+        lastResults,
+      };
+      this.server.to(room).emit('fullInfo', response);
+    } catch (error) {
+      console.error('Error al enviar la info completa:', error);
+    }
+  }
+
+  private async sendWinnerInfo(room: string, result?: Result) {
+    try {
+      this.server.to(room).emit('winnerInfo', result);
     } catch (error) {
       console.error('Error al enviar el próximo lote:', error);
     }
