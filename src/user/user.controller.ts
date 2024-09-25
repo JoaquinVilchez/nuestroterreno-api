@@ -13,12 +13,14 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { User } from './entities/user.entity';
 import { EditUserDto } from './dto/edit-user.dto';
+import { Public } from 'src/common/decorators/public.decorator';
 
 @ApiTags('Users')
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @Public()
   @ApiTags('Users')
   @ApiOperation({ summary: 'Crear un nuevo usuario' })
   @ApiResponse({

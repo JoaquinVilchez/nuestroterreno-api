@@ -19,6 +19,7 @@ import { Lot } from 'src/lots/entities/lot.entity';
 import { Participant } from 'src/participants/entities/participant.entity';
 import { ParticipantService } from 'src/participants/participant.service';
 import { LotService } from 'src/lots/lots.service';
+import { scheduledDraw } from 'helpers/catalogs';
 
 @Injectable()
 export class ResultService {
@@ -478,5 +479,44 @@ export class ResultService {
       );
       dto.orderNumber = registeredWinners.length + 1;
     }
+  }
+
+  // Asumimos que esta función existe y puede obtener el total de resultados registrados.
+  async getTotalResultsRegistered(): Promise<number> {
+    // Aquí deberías implementar la lógica para obtener el número total de resultados registrados.
+    return this.resultRepository.count(); // Ejemplo usando TypeORM.
+  }
+
+  async getNextDraw(): Promise<any> {
+    const totalResults = await this.getTotalResultsRegistered();
+    return this.calculateNextDraw(totalResults);
+  }
+
+  private async calculateNextDraw(totalResults: number): Promise<any> {
+    let incumbentCount = 0;
+
+    for (const group in scheduledDraw) {
+      for (const draw of scheduledDraw[group]) {
+        const isCurrentDraw = totalResults < draw.quantity;
+
+        if (draw.category === 'incumbent') {
+          incumbentCount += draw.quantity;
+        }
+
+        if (isCurrentDraw) {
+          if (draw.category === 'incumbent') {
+            const lot = await this.lotService.getOneById(
+              incumbentCount - (draw.quantity - (totalResults + 1)),
+            );
+            return { group, lot, ...draw, drawNumber: totalResults + 1 };
+          }
+          return { group, ...draw, drawNumber: totalResults + 1 };
+        }
+
+        totalResults -= draw.quantity;
+      }
+    }
+
+    return null;
   }
 }

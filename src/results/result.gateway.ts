@@ -79,7 +79,7 @@ export class ResultGateway {
         undefined,
         5,
         'DESC',
-        [],
+        ['participant', 'lot'],
       );
       this.server.to(room).emit('lastResults', results);
     } catch (error) {

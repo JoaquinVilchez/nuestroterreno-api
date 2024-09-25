@@ -4,6 +4,7 @@ import {
   Controller,
   Delete,
   Get,
+  InternalServerErrorException,
   NotFoundException,
   Param,
   ParseIntPipe,
@@ -32,6 +33,30 @@ export class ResultController {
     private readonly resultService: ResultService,
     private readonly participantService: ParticipantService,
   ) {}
+
+  @Get('next-draw')
+  async getNextDraw() {
+    try {
+      const nextDraw = await this.resultService.getNextDraw();
+      return { status: 'success', data: nextDraw };
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Error fetching next draw information',
+      );
+    }
+  }
+
+  @Get('current')
+  async getCurrentDraw() {
+    const lastResult = await this.resultService.getLastResult();
+    if (!lastResult) {
+      throw new NotFoundException('No hay sorteos registrados aún.');
+    }
+    return {
+      message: 'Sorteo actual obtenido exitosamente',
+      data: lastResult,
+    };
+  }
 
   @ApiTags('Results')
   @ApiOperation({ summary: 'Obtener múltiples resultados' })

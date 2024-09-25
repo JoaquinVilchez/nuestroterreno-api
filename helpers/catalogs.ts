@@ -12,52 +12,70 @@ export const resultTypeCatalog = {
   ALTERNATE: 'alternate',
 };
 
+// export const NumberOfDrawsCatalog = {
+//   cpd: [
+//     {
+//       group: 1,
+//       incumbent: 1,
+//       alternate: 6,
+//     },
+//     {
+//       group: 2,
+//       incumbent: 1,
+//       alternate: 3,
+//     },
+//   ],
+//   general: [
+//     {
+//       group: 1,
+//       incumbent: 43,
+//       alternate: 43,
+//     },
+//     {
+//       group: 2,
+//       incumbent: 14,
+//       alternate: 14,
+//     },
+//   ],
+// };
+
 export const NumberOfDrawsCatalog = {
   cpd: [
-    {
-      group: 1,
-      incumbent: 1,
-      alternate: 6,
-    },
-    {
-      group: 2,
-      incumbent: 1,
-      alternate: 3,
-    },
-    {
-      group: 3,
-      incumbent: 1,
-      alternate: 3,
-    },
-    {
-      group: 4,
-      incumbent: 1,
-      alternate: 3,
-    },
+    { group: 1, incumbent: 1, alternate: 3 },
+    { group: 2, incumbent: 1, alternate: 3 },
   ],
   general: [
-    {
-      group: 1,
-      incumbent: 43,
-      alternate: 43,
-    },
-    {
-      group: 2,
-      incumbent: 14,
-      alternate: 14,
-    },
-    {
-      group: 3,
-      incumbent: 35,
-      alternate: 35,
-    },
-    {
-      group: 4,
-      incumbent: 14,
-      alternate: 14,
-    },
+    { group: 1, incumbent: 41, alternate: 41 },
+    { group: 2, incumbent: 11, alternate: 11 },
   ],
 };
+
+export function generateScheduledDraw() {
+  const scheduledDraw = {};
+
+  for (const drawType in NumberOfDrawsCatalog) {
+    NumberOfDrawsCatalog[drawType].forEach((draw) => {
+      const groupKey = draw.group;
+      if (!scheduledDraw[groupKey]) {
+        scheduledDraw[groupKey] = [];
+      }
+      scheduledDraw[groupKey].push({
+        type: drawType.toUpperCase(),
+        category: 'incumbent',
+        quantity: draw.incumbent,
+      });
+      scheduledDraw[groupKey].push({
+        type: drawType.toUpperCase(),
+        category: 'alternate',
+        quantity: draw.alternate,
+      });
+    });
+  }
+
+  return scheduledDraw;
+}
+
+export const scheduledDraw = generateScheduledDraw();
 
 export const TranslateCatalog = {
   incumbent: 'titular',
