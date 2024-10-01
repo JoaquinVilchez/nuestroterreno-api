@@ -14,7 +14,7 @@ RUN npm install --frozen-lockfile --ignore-scripts
 COPY . .
 
 RUN npm run build && \
-  npm install --production --frozen-lockfile
+  npm install --frozen-lockfile
 
 # Etapa de producción
 FROM node:20-alpine
