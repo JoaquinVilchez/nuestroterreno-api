@@ -60,4 +60,7 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 .git
 .dockerignore
 Dockerfile
+# Ignorar todos los archivos que comienzan con docker-compose
 docker-compose*
+# Excepción: No ignorar docker-compose.prod.yml
+!docker-compose.prod.yml
