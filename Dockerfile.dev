@@ -1,0 +1,20 @@
+# Dockerfile.dev
+
+FROM node:20-alpine
+
+ENV NODE_ENV development
+
+WORKDIR /nuestroterreno-api
+
+COPY package*.json tsconfig.json ./
+
+RUN npm install --frozen-lockfile
+
+# Instalar herramientas de desarrollo globales si es necesario
+RUN npm install -g nodemon
+
+COPY . .
+
+EXPOSE 3000
+
+CMD ["npm", "run", "dev"]

@@ -3,10 +3,10 @@ services:
   app:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.prod
     ports:
       - "3000:3000"
-    env_file: 
+    env_file:
       - .env.prod
     networks:
       - my-network

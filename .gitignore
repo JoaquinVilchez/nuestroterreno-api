@@ -1,4 +1,4 @@
-# compiled output
+# Compiled output
 /dist
 /node_modules
 /build
@@ -44,7 +44,7 @@ lerna-debug.log*
 .env.local
 .development.env
 
-# temp directory
+# Temp directory
 .temp
 .tmp
 
@@ -57,10 +57,13 @@ pids
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
+# Git
 .git
+
+# Docker
 .dockerignore
-Dockerfile
-# Ignorar todos los archivos que comienzan con docker-compose
-docker-compose*
-# Excepción: No ignorar docker-compose.prod.yml
+
+# Ignorar todos los archivos que comienzan con docker-compose excepto docker-compose.yml y docker-compose.prod.yml
+docker-compose.*
+!docker-compose.yml
 !docker-compose.prod.yml
