@@ -6,14 +6,11 @@ services:
       dockerfile: Dockerfile
     ports:
       - "3000:3000"
-    env_file:
+    env_file: 
       - .env.prod
     networks:
       - my-network
     restart: unless-stopped
-
-volumes:
-  # No necesitamos volúmenes para producción ya que usamos RDS
 
 networks:
   my-network:
