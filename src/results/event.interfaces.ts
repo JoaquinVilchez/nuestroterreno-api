@@ -1,8 +1,10 @@
 import { Result } from './entities/result.entity';
 
 export interface ServerToClientEvents {
-  lastResults: (results: Result[]) => void; // Envía resultados de las consultas a las pantallas
+  lastResults: (response) => void; // Envía resultados de las consultas a las pantallas
+  lastWinner: (result: Result) => void; // Envía resultados de las consultas a las pantallas
   nextDraw: (result) => void;
+  nextCategory: (result) => void;
   fullInfo: (response) => void;
   winnerInfo: (response) => void;
   defaultPage: () => void; // Muestra una página predeterminada (por ejemplo, logo)

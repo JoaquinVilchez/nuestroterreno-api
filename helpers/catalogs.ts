@@ -41,12 +41,12 @@ export const resultTypeCatalog = {
 
 export const NumberOfDrawsCatalog = {
   cpd: [
-    { group: 1, incumbent: 1, alternate: 3 },
-    { group: 2, incumbent: 1, alternate: 3 },
+    { group: 1, incumbent: 2, alternate: 8 },
+    { group: 2, incumbent: 2, alternate: 8 },
   ],
   general: [
-    { group: 1, incumbent: 41, alternate: 41 },
-    { group: 2, incumbent: 11, alternate: 11 },
+    { group: 1, incumbent: 74, alternate: 74 },
+    { group: 2, incumbent: 22, alternate: 22 },
   ],
 };
 
@@ -82,7 +82,7 @@ export const TranslateCatalog = {
   alternate: 'suplente',
 };
 
-export const groups = 3;
+export const groups = 2;
 
 export const resultsTest = [
   {

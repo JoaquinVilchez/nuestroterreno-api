@@ -35,6 +35,11 @@ export class ResultService {
     private readonly resultGateway: ResultGateway, // Usa forwardRef para resolver la dependencia circular
   ) {}
 
+  // Helper para manejar los retrasos
+  private delay(ms: number) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
   async getMany(
     group?: number,
     resultType?: string,
@@ -117,12 +122,37 @@ export class ResultService {
     try {
       const savedResult = await this.resultRepository.save(result);
       if (savedResult) {
-        // Llama al método público del gateway para emitir el evento 'nextDraw'
-        this.resultGateway.emitWinnerInfo('prompter', result);
-        setTimeout(() => {
+        if (result.resultType === 'incumbent') {
+          this.resultGateway.emitWinnerInfo('prompter', result);
+          this.resultGateway.emitWinnerInfo('mainScreen', result);
+          await this.delay(10000);
           this.resultGateway.emitFullInfo('prompter');
-        }, 10000);
+          await this.delay(10000);
+          this.resultGateway.emitDefaultPage('mainScreen');
+
+          await this.delay(20000);
+          this.resultGateway.emitLastResults('mainScreen', {
+            group: result.group,
+            resultType: result.resultType,
+            drawType: result.drawType,
+            quantity: 5,
+          });
+
+          await this.delay(10000);
+          this.resultGateway.emitNextDraw('mainScreen');
+        } else {
+          this.resultGateway.emitWinnerInfo('prompter', result);
+          this.resultGateway.emitLastResults('mainScreen', {
+            group: result.group,
+            resultType: result.resultType,
+            drawType: result.drawType,
+            quantity: 5,
+          });
+          await this.delay(10000);
+          this.resultGateway.emitFullInfo('prompter');
+        }
       }
+
       return savedResult;
     } catch (error) {
       console.error('Error al registrar el resultado:', error);
@@ -178,6 +208,7 @@ export class ResultService {
     const result = await this.resultRepository
       .createQueryBuilder('result')
       .leftJoinAndSelect('result.lot', 'lot')
+      .leftJoinAndSelect('result.participant', 'participant')
       .orderBy('result.id', 'DESC')
       .getOne();
 
@@ -532,12 +563,28 @@ export class ResultService {
 
         if (isCurrentDraw) {
           if (draw.resultType === 'incumbent') {
+            // Incumbents (titulares)
             const lot = await this.lotService.getOneById(
               incumbentCount - (draw.quantity - (totalResults + 1)),
             );
-            return { group, lot, ...draw, drawNumber: totalResults + 1 };
+            return {
+              group,
+              lot,
+              ...draw,
+              drawNumber: totalResults + 1,
+              orderNumber: null, // Los incumbents no tienen número de orden
+            };
+          } else if (draw.resultType === 'alternate') {
+            // Alternates (suplentes)
+            const orderNumber = totalResults + 1; // Asignar el número de orden del suplente
+            return {
+              group,
+              lot: null, // Los alternates no tienen lote asignado
+              ...draw,
+              drawNumber: totalResults + 1,
+              orderNumber, // Asignar el número de orden
+            };
           }
-          return { group, ...draw, drawNumber: totalResults + 1 };
         }
 
         totalResults -= draw.quantity;

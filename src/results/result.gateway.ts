@@ -60,17 +60,39 @@ export class ResultGateway {
     this.sendFullInfo(room); // Llama a la función privada
   }
 
+  public emitNextDraw(room: string) {
+    this.sendNextDraw(room); // Llama a la función privada
+  }
+
+  public emitLastResults(room: string, params) {
+    console.log('emitLastResults', params);
+    this.sendLastResults(room, params); // Llama a la función privada
+  }
+
   public emitWinnerInfo(room: string, result: Result) {
     this.sendWinnerInfo(room, result); // Llama a la función privada
   }
 
-  private async handleAction(action: string, room: string) {
+  public emitDefaultPage(room: string) {
+    this.server.to(room).emit('defaultPage');
+  }
+
+  private async handleAction(args: string, room: string) {
+    const action = args[0];
+    const params = args[1];
+
     switch (action) {
       case 'lastResults':
-        await this.sendLastResults(room);
+        await this.sendLastResults(room, params);
+        break;
+      case 'lastWinner':
+        await this.sendLastWinner(room);
         break;
       case 'nextDraw':
         await this.sendNextDraw(room);
+        break;
+      case 'nextCategory':
+        await this.sendNextCategory(room);
         break;
       case 'defaultPage':
         this.server.to(room).emit('defaultPage');
@@ -87,19 +109,35 @@ export class ResultGateway {
   }
 
   // Métodos separados para enviar datos a salas específicas
-  private async sendLastResults(room: string) {
+  private async sendLastResults(room: string, params) {
+    const getParameter = (value) => (value === '' ? undefined : value);
+
     try {
       const results = await this.resultsService.getMany(
-        undefined,
-        undefined,
-        undefined,
-        5,
+        getParameter(params.group),
+        getParameter(params.resultType),
+        getParameter(params.drawType),
+        params.quantity,
         'DESC',
         ['participant', 'lot'],
       );
-      this.server.to(room).emit('lastResults', results);
+
+      const response = {
+        results,
+        params,
+      };
+      this.server.to(room).emit('lastResults', response);
     } catch (error) {
       console.error('Error al enviar últimos resultados:', error);
+    }
+  }
+
+  private async sendLastWinner(room: string) {
+    try {
+      const lastWinner = await this.resultsService.getLastResult();
+      this.server.to(room).emit('lastWinner', lastWinner);
+    } catch (error) {
+      console.error('Error al enviar el último ganador:', error);
     }
   }
 
@@ -109,6 +147,15 @@ export class ResultGateway {
       this.server.to(room).emit('nextDraw', nextDraw);
     } catch (error) {
       console.error('Error al enviar el próximo lote:', error);
+    }
+  }
+
+  private async sendNextCategory(room: string) {
+    try {
+      const nextCategory = await this.resultsService.getNextDraw();
+      this.server.to(room).emit('nextCategory', nextCategory);
+    } catch (error) {
+      console.error('Error al enviar la próxima categoría:', error);
     }
   }
 
