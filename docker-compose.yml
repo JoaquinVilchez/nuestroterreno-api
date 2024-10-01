@@ -15,6 +15,19 @@ services:
     networks:
       - my-network
 
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    networks:
+      - my-network
+    depends_on:
+      - db
+
 volumes:
   db-data:
 
