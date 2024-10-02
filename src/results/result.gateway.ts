@@ -13,7 +13,7 @@ import { Result } from './entities/result.entity';
 
 @WebSocketGateway({
   cors: {
-    origin: 'http://localhost:3001', // URL de tu frontend
+    origin: 'https://api.nuestroterreno.com.ar/', // URL de tu frontend
     methods: ['GET', 'POST'],
     credentials: true,
   },
