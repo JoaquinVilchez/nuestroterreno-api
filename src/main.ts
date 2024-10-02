@@ -7,6 +7,7 @@ import generateTypeOrmConfigFile from 'scripts/generate-typeorm-config-file';
 import { corsConfig } from '../config/cors.config';
 import { setupSwagger } from 'config/swagger.config';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
+import { IoAdapter } from '@nestjs/platform-socket.io';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -15,12 +16,16 @@ async function bootstrap() {
   const port = parseInt(config.get<string>(SERVER_PORT), 10) || 3000;
 
   const reflector = app.get(Reflector);
+  const ioAdapter = new IoAdapter(app);
 
   app.useGlobalGuards(new JwtAuthGuard(reflector));
 
   generateTypeOrmConfigFile(config);
 
   app.enableCors(corsConfig(config));
+
+  app.useWebSocketAdapter(ioAdapter);
+
   setupSwagger(app);
 
   await app.listen(port);
