@@ -29,7 +29,7 @@ export class ParticipantService {
 
     if (forSelect) {
       // Filtro para el sorteo CPD
-      if (drawType === DrawType.CPD) {
+      if (drawType.toLowerCase() === DrawType.CPD) {
         queryBuilder.andWhere('participant.drawType = :drawType', { drawType });
 
         queryBuilder.leftJoin('participant.results', 'result');
@@ -42,7 +42,7 @@ export class ParticipantService {
         queryBuilder.andWhere('result.order_number IS NULL');
       }
       // Filtro para el sorteo General
-      else if (drawType === DrawType.GENERAL) {
+      else if (drawType.toLowerCase() === DrawType.GENERAL) {
         // Filtrar participantes que son del General o del CPD
         queryBuilder.andWhere(
           '(participant.drawType = :general OR participant.drawType = :cpd)',
@@ -87,9 +87,9 @@ export class ParticipantService {
         );
       }
     } else {
-      if (drawType === DrawType.CPD) {
+      if (drawType.toLowerCase() === DrawType.CPD) {
         queryBuilder.andWhere('participant.drawType = :drawType', { drawType });
-      } else if (drawType === DrawType.GENERAL) {
+      } else if (drawType.toLowerCase() === DrawType.GENERAL) {
         queryBuilder.andWhere('participant.drawType = :drawType', { drawType });
       }
     }

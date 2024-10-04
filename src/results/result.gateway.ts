@@ -13,7 +13,8 @@ import { Result } from './entities/result.entity';
 
 @WebSocketGateway({
   cors: {
-    origin: 'https://www.nuestroterreno.com.ar', // URL de tu frontend
+    // origin: 'https://www.nuestroterreno.com.ar', // URL de tu frontend
+    origin: process.env.CORS_ORIGIN,
     methods: ['GET', 'POST'],
     credentials: true,
   },
@@ -39,19 +40,16 @@ export class ResultGateway {
 
   @SubscribeMessage('mainScreenAction')
   async handleMainScreenAction(@MessageBody() action: string) {
-    console.log(`Recibido 'mainScreenAction' con acción: ${action}`);
     await this.handleAction(action, 'mainScreen');
   }
 
   @SubscribeMessage('prompterAction')
   async handlePrompterAction(@MessageBody() action: string) {
-    console.log(`Recibido 'prompterAction' con acción: ${action}`);
     await this.handleAction(action, 'prompter');
   }
 
   @SubscribeMessage('broadcastAction')
   async handleBroadcastAction(@MessageBody() action: string) {
-    console.log(`Recibido 'broadcastAction' con acción: ${action}`);
     await this.handleAction(action, 'broadcast');
   }
 
@@ -65,7 +63,6 @@ export class ResultGateway {
   }
 
   public emitLastResults(room: string, params) {
-    console.log('emitLastResults', params);
     this.sendLastResults(room, params); // Llama a la función privada
   }
 
@@ -115,8 +112,8 @@ export class ResultGateway {
     try {
       const results = await this.resultsService.getMany(
         getParameter(params.group),
-        getParameter(params.resultType),
-        getParameter(params.drawType),
+        getParameter(params.resultType.toLowerCase()),
+        getParameter(params.drawType.toLowerCase()),
         params.quantity,
         'DESC',
         ['participant', 'lot'],

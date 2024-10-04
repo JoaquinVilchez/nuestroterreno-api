@@ -57,12 +57,12 @@ export class LotService {
       where: {
         id: id,
         group: group,
-        drawType: drawType,
+        drawType: drawType.toLowerCase(),
       },
     });
     if (!lot)
       throw new NotFoundException(
-        `No existe un lote con el id ${id}, el grupo ${group} y el tipo de sorteo ${drawType}`,
+        `No existe un lote con el id ${id}, el grupo ${group} y el tipo de sorteo ${drawType.toLowerCase()}`,
       );
 
     return lot;

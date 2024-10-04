@@ -34,6 +34,17 @@ export class ResultController {
     private readonly participantService: ParticipantService,
   ) {}
 
+  @Get('count')
+  async getCount() {
+    try {
+      return await this.resultService.countResults();
+    } catch (error) {
+      throw new InternalServerErrorException(
+        `Error intentando contar los resultados: ${error}`,
+      );
+    }
+  }
+
   @Get('next-draw')
   async getNextDraw() {
     try {
@@ -79,8 +90,8 @@ export class ResultController {
 
     return await this.resultService.getMany(
       group,
-      resultType,
-      drawType,
+      resultType.toLowerCase(),
+      drawType.toLowerCase(),
       quantity,
       orderBy,
       includesArray || [],

@@ -8,7 +8,8 @@ import { Server, Socket } from 'socket.io';
 
 @WebSocketGateway({
   cors: {
-    origin: 'https://www.nuestroterreno.com.ar', // URL de tu frontend
+    // origin: 'https://www.nuestroterreno.com.ar', // URL de tu frontend
+    origin: process.env.CORS_ORIGIN,
     methods: ['GET', 'POST'],
     credentials: true,
   },

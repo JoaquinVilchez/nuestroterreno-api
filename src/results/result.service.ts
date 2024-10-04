@@ -40,6 +40,45 @@ export class ResultService {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
+  private async emitWebSocketEvents(result: any) {
+    if (result.resultType.toLowerCase() === 'incumbent') {
+      this.resultGateway.emitWinnerInfo('prompter', result);
+      this.resultGateway.emitWinnerInfo('mainScreen', result);
+
+      await this.delay(10000);
+      this.resultGateway.emitFullInfo('prompter');
+
+      await this.delay(10000);
+      this.resultGateway.emitDefaultPage('mainScreen');
+
+      await this.delay(20000);
+      this.resultGateway.emitLastResults('mainScreen', {
+        group: result.group,
+        resultType: result.resultType.toLowerCase(),
+        drawType: result.drawType.toLowerCase(),
+        quantity: 5,
+      });
+
+      await this.delay(10000);
+      this.resultGateway.emitNextDraw('mainScreen');
+    } else {
+      this.resultGateway.emitWinnerInfo('prompter', result);
+      this.resultGateway.emitLastResults('mainScreen', {
+        group: result.group,
+        resultType: result.resultType.toLowerCase(),
+        drawType: result.drawType.toLowerCase(),
+        quantity: 5,
+      });
+
+      await this.delay(10000);
+      this.resultGateway.emitFullInfo('prompter');
+    }
+  }
+
+  async countResults(): Promise<number> {
+    return this.resultRepository.count();
+  }
+
   async getMany(
     group?: number,
     resultType?: string,
@@ -70,8 +109,9 @@ export class ResultService {
 
     const conditions: any = {};
     if (group !== undefined) conditions['group'] = group;
-    if (resultType !== undefined) conditions['resultType'] = resultType;
-    if (drawType !== undefined) conditions['drawType'] = drawType;
+    if (resultType !== undefined)
+      conditions['resultType'] = resultType.toLowerCase();
+    if (drawType !== undefined) conditions['drawType'] = drawType.toLowerCase();
 
     const queryBuilder = this.resultRepository
       .createQueryBuilder('result')
@@ -109,7 +149,7 @@ export class ResultService {
     const participant = await this.participantService.getOne(dto.participant);
 
     let lot = null;
-    if (dto.resultType === 'incumbent') {
+    if (dto.resultType.toLowerCase() === 'incumbent') {
       lot = dto.lot ? await this.lotService.getOneById(dto.lot) : null;
     }
 
@@ -122,37 +162,8 @@ export class ResultService {
     try {
       const savedResult = await this.resultRepository.save(result);
       if (savedResult) {
-        if (result.resultType === 'incumbent') {
-          this.resultGateway.emitWinnerInfo('prompter', result);
-          this.resultGateway.emitWinnerInfo('mainScreen', result);
-          await this.delay(10000);
-          this.resultGateway.emitFullInfo('prompter');
-          await this.delay(10000);
-          this.resultGateway.emitDefaultPage('mainScreen');
-
-          await this.delay(20000);
-          this.resultGateway.emitLastResults('mainScreen', {
-            group: result.group,
-            resultType: result.resultType,
-            drawType: result.drawType,
-            quantity: 5,
-          });
-
-          await this.delay(10000);
-          this.resultGateway.emitNextDraw('mainScreen');
-        } else {
-          this.resultGateway.emitWinnerInfo('prompter', result);
-          this.resultGateway.emitLastResults('mainScreen', {
-            group: result.group,
-            resultType: result.resultType,
-            drawType: result.drawType,
-            quantity: 5,
-          });
-          await this.delay(10000);
-          this.resultGateway.emitFullInfo('prompter');
-        }
+        this.emitWebSocketEvents(savedResult);
       }
-
       return savedResult;
     } catch (error) {
       console.error('Error al registrar el resultado:', error);
@@ -334,10 +345,10 @@ export class ResultService {
     await this.validateParticipant(dto);
     await this.validateParticipantWinner(dto, isUpdate);
 
-    if (dto.resultType === 'incumbent') {
+    if (dto.resultType.toLowerCase() === 'incumbent') {
       await this.validateLot(dto, isUpdate);
     }
-    if (dto.resultType === 'alternate') {
+    if (dto.resultType.toLowerCase() === 'alternate') {
       await this.assignOrderNumber(dto, isUpdate);
     }
   }
@@ -364,8 +375,8 @@ export class ResultService {
   ): Promise<void> {
     const registeredWinners = await this.getRegisteredWinners(
       dto.group,
-      dto.resultType,
-      dto.drawType,
+      dto.resultType.toLowerCase(),
+      dto.drawType.toLowerCase(),
     );
 
     const limitOfWinners = NumberOfDrawsCatalog[dto.drawType].find(
@@ -374,7 +385,7 @@ export class ResultService {
 
     if (registeredWinners.length >= limitOfWinners && !isUpdate) {
       throw new BadRequestException(
-        `No se puede registrar más un ${TranslateCatalog[dto.resultType]} de tipo ${dto.drawType} en el grupo ${dto.group}`,
+        `No se puede registrar más un ${TranslateCatalog[dto.resultType.toLowerCase()]} de tipo ${dto.drawType.toLowerCase()} en el grupo ${dto.group}`,
       );
     }
   }
@@ -407,11 +418,11 @@ export class ResultService {
     }
 
     if (
-      dto.drawType === drawTypeCatalog.CPD &&
-      dto.drawType !== participant.drawType
+      dto.drawType.toLowerCase() === drawTypeCatalog.CPD &&
+      dto.drawType.toLowerCase() !== participant.drawType.toLowerCase()
     ) {
       throw new BadRequestException(
-        `El participante debe ser del tipo ${dto.drawType}`,
+        `El participante debe ser del tipo ${dto.drawType.toLowerCase()}`,
       );
     }
   }
@@ -447,7 +458,7 @@ export class ResultService {
     if (existingResult && !isUpdate) {
       // Verifica si el participante tiene un resultado como titular en el mismo grupo
       if (
-        existingResult.resultType === 'incumbent' &&
+        existingResult.resultType.toLowerCase() === 'incumbent' &&
         existingResult.group === dto.group
       ) {
         throw new BadRequestException(
@@ -457,8 +468,8 @@ export class ResultService {
 
       // Si el participante tiene un resultado como suplente en el mismo grupo y el nuevo registro es también como suplente
       if (
-        existingResult.resultType === 'alternate' &&
-        dto.resultType === 'alternate' &&
+        existingResult.resultType.toLowerCase() === 'alternate' &&
+        dto.resultType.toLowerCase() === 'alternate' &&
         existingResult.group === dto.group
       ) {
         throw new BadRequestException(
@@ -491,7 +502,7 @@ export class ResultService {
     dto: CreateResultDto,
     isUpdate: boolean,
   ): Promise<void> {
-    if (dto.resultType === resultTypeCatalog.INCUMBENT) {
+    if (dto.resultType.toLowerCase() === resultTypeCatalog.INCUMBENT) {
       if (!dto.lot) {
         throw new BadRequestException('Debes ingresar un lote');
       }
@@ -499,7 +510,7 @@ export class ResultService {
       const lot = await this.lotService.getOne(
         dto.lot,
         dto.group,
-        dto.drawType,
+        dto.drawType.toLowerCase(),
       );
 
       if ((await this.getByLot(lot)) && !isUpdate) {
@@ -529,11 +540,14 @@ export class ResultService {
     dto: CreateResultDto,
     isUpdate: boolean,
   ): Promise<void> {
-    if (dto.resultType === resultTypeCatalog.ALTERNATE && !isUpdate) {
+    if (
+      dto.resultType.toLowerCase() === resultTypeCatalog.ALTERNATE &&
+      !isUpdate
+    ) {
       const registeredWinners = await this.getRegisteredWinners(
         dto.group,
         resultTypeCatalog.ALTERNATE,
-        dto.drawType,
+        dto.drawType.toLowerCase(),
       );
       dto.orderNumber = registeredWinners.length + 1;
     }
@@ -557,12 +571,12 @@ export class ResultService {
       for (const draw of scheduledDraw[group]) {
         const isCurrentDraw = totalResults < draw.quantity;
 
-        if (draw.resultType === 'incumbent') {
+        if (draw.resultType.toLowerCase() === 'incumbent') {
           incumbentCount += draw.quantity;
         }
 
         if (isCurrentDraw) {
-          if (draw.resultType === 'incumbent') {
+          if (draw.resultType.toLowerCase() === 'incumbent') {
             // Incumbents (titulares)
             const lot = await this.lotService.getOneById(
               incumbentCount - (draw.quantity - (totalResults + 1)),
@@ -574,7 +588,7 @@ export class ResultService {
               drawNumber: totalResults + 1,
               orderNumber: null, // Los incumbents no tienen número de orden
             };
-          } else if (draw.resultType === 'alternate') {
+          } else if (draw.resultType.toLowerCase() === 'alternate') {
             // Alternates (suplentes)
             const orderNumber = totalResults + 1; // Asignar el número de orden del suplente
             return {
