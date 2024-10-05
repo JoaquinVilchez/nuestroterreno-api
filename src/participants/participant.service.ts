@@ -87,9 +87,9 @@ export class ParticipantService {
         );
       }
     } else {
-      if (drawType.toLowerCase() === DrawType.CPD) {
+      if (drawType === DrawType.CPD) {
         queryBuilder.andWhere('participant.drawType = :drawType', { drawType });
-      } else if (drawType.toLowerCase() === DrawType.GENERAL) {
+      } else if (drawType === DrawType.GENERAL) {
         queryBuilder.andWhere('participant.drawType = :drawType', { drawType });
       }
     }

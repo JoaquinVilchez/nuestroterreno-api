@@ -90,8 +90,8 @@ export class ResultController {
 
     return await this.resultService.getMany(
       group,
-      resultType.toLowerCase(),
-      drawType.toLowerCase(),
+      resultType,
+      drawType,
       quantity,
       orderBy,
       includesArray || [],
