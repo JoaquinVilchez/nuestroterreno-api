@@ -49,7 +49,7 @@ export class ResultService {
       await this.delay(10000);
       this.resultGateway.emitFullInfo('prompter');
 
-      await this.delay(10000);
+      await this.delay(5000);
       this.resultGateway.emitDefaultPage('mainScreen');
       this.resultGateway.emitLastResults('broadcast', {
         group: result.group,
@@ -58,7 +58,7 @@ export class ResultService {
         quantity: 3,
       });
 
-      await this.delay(20000);
+      await this.delay(5000);
       this.resultGateway.emitLastResults('mainScreen', {
         group: result.group,
         resultType: result.resultType.toLowerCase(),
@@ -66,7 +66,7 @@ export class ResultService {
         quantity: 5,
       });
 
-      await this.delay(10000);
+      await this.delay(5000);
       this.resultGateway.emitNextDraw('mainScreen');
       this.resultGateway.emitNextDraw('broadcast');
     } else {
