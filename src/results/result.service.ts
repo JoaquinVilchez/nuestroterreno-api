@@ -46,7 +46,7 @@ export class ResultService {
       this.resultGateway.emitWinnerInfo('mainScreen', result);
       this.resultGateway.emitWinnerInfo('broadcast', result);
 
-      await this.delay(10000);
+      await this.delay(8000);
       this.resultGateway.emitFullInfo('prompter');
 
       await this.delay(5000);
