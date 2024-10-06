@@ -7,6 +7,8 @@ export interface ServerToClientEvents {
   nextCategory: (result) => void;
   fullInfo: (response) => void;
   winnerInfo: (response) => void;
+  qrPage: () => void;
+  hideContent: () => void;
   defaultPage: () => void; // Muestra una página predeterminada (por ejemplo, logo)
 }
 

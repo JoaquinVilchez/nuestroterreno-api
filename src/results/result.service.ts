@@ -44,12 +44,19 @@ export class ResultService {
     if (result.resultType.toLowerCase() === 'incumbent') {
       this.resultGateway.emitWinnerInfo('prompter', result);
       this.resultGateway.emitWinnerInfo('mainScreen', result);
+      this.resultGateway.emitWinnerInfo('broadcast', result);
 
       await this.delay(10000);
       this.resultGateway.emitFullInfo('prompter');
 
       await this.delay(10000);
       this.resultGateway.emitDefaultPage('mainScreen');
+      this.resultGateway.emitLastResults('broadcast', {
+        group: result.group,
+        resultType: result.resultType.toLowerCase(),
+        drawType: result.drawType.toLowerCase(),
+        quantity: 3,
+      });
 
       await this.delay(20000);
       this.resultGateway.emitLastResults('mainScreen', {
@@ -61,6 +68,7 @@ export class ResultService {
 
       await this.delay(10000);
       this.resultGateway.emitNextDraw('mainScreen');
+      this.resultGateway.emitNextDraw('broadcast');
     } else {
       this.resultGateway.emitWinnerInfo('prompter', result);
       this.resultGateway.emitLastResults('mainScreen', {
@@ -68,6 +76,12 @@ export class ResultService {
         resultType: result.resultType.toLowerCase(),
         drawType: result.drawType.toLowerCase(),
         quantity: 5,
+      });
+      this.resultGateway.emitLastResults('broadcast', {
+        group: result.group,
+        resultType: result.resultType.toLowerCase(),
+        drawType: result.drawType.toLowerCase(),
+        quantity: 3,
       });
 
       await this.delay(10000);
@@ -162,6 +176,7 @@ export class ResultService {
     try {
       const savedResult = await this.resultRepository.save(result);
       if (savedResult) {
+        console.log('savedResult:', savedResult);
         this.emitWebSocketEvents(savedResult);
       }
       return savedResult;

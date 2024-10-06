@@ -100,6 +100,12 @@ export class ResultGateway {
       case 'winnerInfo':
         await this.sendWinnerInfo(room);
         break;
+      case 'qrPage':
+        await this.sendQrPage(room);
+        break;
+      case 'hideContent':
+        await this.sendHideContent(room);
+        break;
       default:
         console.error(`Acción desconocida: ${action}`);
     }
@@ -178,10 +184,27 @@ export class ResultGateway {
   }
 
   private async sendWinnerInfo(room: string, result?: Result) {
+    console.log('sendWinnerInfo', room, result);
     try {
       this.server.to(room).emit('winnerInfo', result);
     } catch (error) {
       console.error('Error al enviar el próximo lote:', error);
+    }
+  }
+
+  private async sendQrPage(room: string) {
+    try {
+      this.server.to(room).emit('qrPage');
+    } catch (error) {
+      console.error('Error al enviar el qrPage:', error);
+    }
+  }
+
+  private async sendHideContent(room: string) {
+    try {
+      this.server.to(room).emit('hideContent');
+    } catch (error) {
+      console.error('Error al enviar el hideContent:', error);
     }
   }
 }
