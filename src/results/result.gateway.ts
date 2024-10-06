@@ -184,7 +184,6 @@ export class ResultGateway {
   }
 
   private async sendWinnerInfo(room: string, result?: Result) {
-    console.log('sendWinnerInfo', room, result);
     try {
       this.server.to(room).emit('winnerInfo', result);
     } catch (error) {

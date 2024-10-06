@@ -176,7 +176,6 @@ export class ResultService {
     try {
       const savedResult = await this.resultRepository.save(result);
       if (savedResult) {
-        console.log('savedResult:', savedResult);
         this.emitWebSocketEvents(savedResult);
       }
       return savedResult;
